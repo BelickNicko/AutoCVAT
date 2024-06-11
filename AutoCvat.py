@@ -103,13 +103,8 @@ def main(**kwargs):
     os.mkdir(result_folder + "/annotations")
     os.mkdir(result_folder + "/images")
     os.mkdir("images_for_cvat")
-
     # Получаем список файлов в исходной папке
     files = os.listdir(input_folder)
-
-    # Сохраняем ли изображения в zip - архив для загрузки в CVAT
-    save_foto = input("Сохранить изображения для загрузки в CVAT (YES/ДА -> сохраняем): ").lower()
-
     # Копируем каждый файл из исходной папки в целевую папку
     for file_name in files:
         source_file = os.path.join(input_folder, file_name)
@@ -117,7 +112,7 @@ def main(**kwargs):
         shutil.copy2(
             source_file, destination_file
         )  # Используем shutil.copy2 для копирования с метаданными
-        if save_foto == "yes" or save_foto == "да":
+        if configs['save_foto']:
             shutil.copy2(source_file, os.path.join("images_for_cvat", file_name))
 
     # Создаем zip ахрив для загрузки в CVAT
@@ -125,7 +120,7 @@ def main(**kwargs):
     # Удаляем папку изображений для загрузки в CVAT
     shutil.rmtree("images_for_cvat")
     # в терминале прописываем путь к результирующей папке
-    if save_foto == "yes" or save_foto == "да":
+    if configs['save_foto']:
         print(f"zip ахрив для загрузки в CVAT: images_for_cvat.zip")
     # Создаем строку JSON под формат COCO
     # Извлекаем каждое изображение из папки и создаем список elements
@@ -156,8 +151,8 @@ def main(**kwargs):
     shutil.rmtree(result_folder)
 
     # Создадим json под CVAT проект
-    generate_and_save_class_list(classes_CVAT)
-
+    if configs['classes_CVAT']:
+        generate_and_save_class_list(classes_CVAT)
 
 if __name__ == "__main__":
     main()

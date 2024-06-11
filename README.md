@@ -46,7 +46,8 @@ confs:
   3: 0.5
   14: 0.6
 iou: 0.7
-
+save_foto: True # whether to create a file .zip photos to upload to CVAT
+classes_CVAT: True # should I create a json file with classes for CVAT
 ```
 
 It is important to note that the number of confidentiality parameters must match the number of class names.
