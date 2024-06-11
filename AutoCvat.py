@@ -69,27 +69,22 @@ def generate_and_save_class_list(original_classes, file_name="new_classes.json")
     help="Названия zip архива аннотаций формата COCO CVAT",
     type=str,
 )
-@click.option(
-    "--yaml_pth",
-    default="coco_classes.yaml",
-    help="Pairs of classes - ther indexes for COCO",
-    type=str,
-)
+
 def main(**kwargs):
 
     result_folder = kwargs["annotations_zip"]
     MODEL_PTH = kwargs["weights"]
     input_folder = kwargs["img_folder"]
-    use_yaml = kwargs["yaml_pth"]
+    configs = 'configs.yaml'
     # Загрузка данных из YAML файла
-    with open(use_yaml, "r") as yaml_file:
-        data = yaml.safe_load(yaml_file)
-
+    with open(configs, "r") as yaml_file:
+        configs = yaml.safe_load(yaml_file)
+        
     # Получение всех ключей и всех значений
-    classes_CVAT = list(data["names"].values())
-    classes_COCO = list(data["names"].keys())
+    classes_CVAT = list(configs["names"].values())
+    classes_COCO = list(configs["names"].keys())
     try:
-        dict_confs = data["conf"]
+        dict_confs = configs["conf"]
         if classes_COCO != list(dict_confs):
             raise LengthMismatchError(
                 f"Cписок классов и список ключей словаря порогов уверенности не совпадают. Каждый класс должен соответствовать порогу уверенности."
@@ -138,7 +133,7 @@ def main(**kwargs):
     elements = datagen.process()
     # Инференс каждой фотографии
     inferencer = Inferencer(
-        elements, model_path=MODEL_PTH, classes_list=classes_COCO, conf_dict=dict_confs
+        elements, model_path=MODEL_PTH, classes_list=classes_COCO, conf_dict=dict_confs, iou=configs['iou']
     )
     elements = inferencer.process()
     # Создаем JSON объект

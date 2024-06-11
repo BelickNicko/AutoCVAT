@@ -1,0 +1,13 @@
+names:
+  0: person
+  1: bicycle
+  2: car
+  3: motorcycle
+  14: bird
+confs:
+  0: 0.7
+  1: 0.4
+  2: 0.4
+  3: 0.5
+  14: 0.6
+iou: 0.7
