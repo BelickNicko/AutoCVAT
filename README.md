@@ -1,4 +1,4 @@
-# YoloToCoco
+# Auto-labling CVAT
 Auxiliary tool, auto-labling. 
 Intended use: for tasks related to the training of custom solutions based on [Yolo models][1]  
 What it does: implements the inference and converts the output to the Coco 1.0 format supported by CVAT
