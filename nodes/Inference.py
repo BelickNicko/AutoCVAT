@@ -95,13 +95,6 @@ class Inferencer:
             try:
                 # список масок под формат COCO
                 element.detected_masks = self.minimize_contours(predictions.masks.data.cpu().numpy(), filtered_indices, element.image)
-                # element.detected_masks = [
-                #    [
-                #        float(detected_masks[i][j]) if j % 2 == 1 else float(detected_masks[i][j])
-                #        for j in range(len(detected_masks[i]))
-                #    ]
-                #    for i in range(len(detected_masks))
-                # ]
                 element.areas = [
                     Polygon(mask).area
                     for i, mask in enumerate(predictions.masks.xy)
