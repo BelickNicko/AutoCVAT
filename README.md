@@ -22,7 +22,7 @@ To interact with the repository, you need to set the following command in the cm
 `python main.py --img_folder=image_cars  --weights=yolov8m.pt  --annotations_zip=cars_annotations `
 
 
-**Table 1. Explanation of clip command values**
+**Table 1. Explanation of CLI command values**
 
 | № | Command               | Description                                                                                     |
 |---|-----------------------|-------------------------------------------------------------------------------------------------|
