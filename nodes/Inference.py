@@ -27,6 +27,7 @@ class Inferencer:
         iou=0.8,
         model=None,
         classes_list=None,
+        minimize_points=True,
         conf_dict={},
     ) -> None:
 
@@ -41,7 +42,7 @@ class Inferencer:
         self.elements = elements
         self.classes = classes_list
         self.conf_dict = conf_dict
-
+        self.minimize_points= minimize_points
     def process(self):
         """
         Обрабатывает набор данных для вывода.
@@ -75,7 +76,6 @@ class Inferencer:
                     if self.conf_dict[classs] <= conf
                 ]
 
-
             else:
                 filtered_indices = [i for i in range(len(predictions))]
             # переводим объекты boxes в формат используемый в COCO
@@ -94,7 +94,24 @@ class Inferencer:
             element.annotations_id = [mask_id + i for i in range(len(filtered_indices))]
             try:
                 # список масок под формат COCO
-                element.detected_masks = self.minimize_contours(predictions.masks.data.cpu().numpy(), filtered_indices, element.image)
+                if self.minimize_points:
+                    element.detected_masks = self.minimize_contours(
+                    predictions.masks.data.cpu().numpy(), filtered_indices, element.image
+                )
+                else:
+                    detected_masks = [
+                    mask.flatten()
+                    for i, mask in enumerate(predictions.masks.xy)
+                    if i in filtered_indices
+                ]
+                    element.detected_masks = [
+                        [
+                            float(detected_masks[i][j]) if j % 2 == 1 else float(detected_masks[i][j])
+                            for j in range(len(detected_masks[i]))
+                        ]
+                        for i in range(len(detected_masks))
+                    ]
+
                 element.areas = [
                     Polygon(mask).area
                     for i, mask in enumerate(predictions.masks.xy)
@@ -114,7 +131,7 @@ class Inferencer:
     def minimize_contours(self, predictions_masks_xy, filtered_indices, image):
         """
         Преобразует маски в минимизированные контуры и сохраняет точки в требуемом формате.
-        
+
         Args:
             predictions_masks_xy (list): Список сегментов в пиксельных координатах, представленных как тензоры.
             filtered_indices (list): Индексы масок, которые нужно обработать.
@@ -123,19 +140,25 @@ class Inferencer:
         """
         minimized_contours = []
         predictions_masks_xy = np.array(predictions_masks_xy)
-        
+
         for i, mask in enumerate(predictions_masks_xy):
             if i in filtered_indices:
                 mask_resized = cv2.resize(
-                    np.array(mask), (image.shape[1], image.shape[0]), interpolation=cv2.INTER_NEAREST)
+                    np.array(mask),
+                    (image.shape[1], image.shape[0]),
+                    interpolation=cv2.INTER_NEAREST,
+                )
                 # Находим все контуры без иерархии
                 mask_contours, _ = cv2.findContours(
-                    mask_resized.astype(np.uint8), cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+                    mask_resized.astype(np.uint8), cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE
+                )
                 # Выбираем контур с наибольшей площадью
                 max_contour = max(mask_contours, key=cv2.contourArea)
                 # Упрощаем контур
                 epsilon = 0.002 * cv2.arcLength(max_contour, True)  # Задаем точность аппроксимации
-                approx = cv2.approxPolyDP(max_contour, epsilon, True)  # Получаем аппроксимированный контур
+                approx = cv2.approxPolyDP(
+                    max_contour, epsilon, True
+                )  # Получаем аппроксимированный контур
                 # Преобразуем все значения координат в целые числа
                 mask_contour_int = list(map(int, approx.reshape(-1)))
                 minimized_contours.append(mask_contour_int)

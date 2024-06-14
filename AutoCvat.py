@@ -69,25 +69,43 @@ def generate_and_save_class_list(original_classes, file_name="new_classes.json")
     help="Названия zip архива аннотаций формата COCO CVAT",
     type=str,
 )
-
+@click.option(
+    "--yaml_pth",
+    default="configs.yaml",
+    help="The path to configuration yaml file",
+    type=str,
+)
+@click.option(
+    "--save_photo",
+    default=False,
+    help="Whether to create a file .zip photos to upload to CVAT",
+    type=bool,
+)
+@click.option(
+    "--cvat_json",
+    default=False,
+    help="Should I create a json file with classes for CVAT",
+    type=bool,
+)
 def main(**kwargs):
-
     result_folder = kwargs["annotations_zip"]
-    MODEL_PTH = kwargs["weights"]
+    model_pth = kwargs["weights"]
     input_folder = kwargs["img_folder"]
-    configs = 'configs.yaml'
+    configs =  kwargs['yaml_pth']
+    save_photo = bool(kwargs['save_photo'])
+    cvat_json =  bool(kwargs['cvat_json'])
     # Загрузка данных из YAML файла
     with open(configs, "r") as yaml_file:
         configs = yaml.safe_load(yaml_file)
         
     # Получение всех ключей и всех значений
-    classes_CVAT = list(configs["names"].values())
-    classes_COCO = list(configs["names"].keys())
+    classes_cvat = list(configs["names"].values())
+    classes_coco = list(configs["names"].keys())
     try:
         dict_confs = configs["conf"]
-        if classes_COCO != list(dict_confs):
+        if classes_coco != list(dict_confs):
             raise LengthMismatchError(
-                f"Cписок классов и список ключей словаря порогов уверенности не совпадают. Каждый класс должен соответствовать порогу уверенности."
+                "Cписок классов и список ключей словаря порогов уверенности не совпадают. Каждый класс должен соответствовать порогу уверенности."
             )
     except KeyError:
         dict_confs = {}
@@ -112,27 +130,26 @@ def main(**kwargs):
         shutil.copy2(
             source_file, destination_file
         )  # Используем shutil.copy2 для копирования с метаданными
-        if configs['save_foto']:
+        if save_photo:
             shutil.copy2(source_file, os.path.join("images_for_cvat", file_name))
-
     # Создаем zip ахрив для загрузки в CVAT
     shutil.make_archive("images_for_cvat", "zip", "images_for_cvat")
     # Удаляем папку изображений для загрузки в CVAT
     shutil.rmtree("images_for_cvat")
     # в терминале прописываем путь к результирующей папке
-    if configs['save_foto']:
-        print(f"zip ахрив для загрузки в CVAT: images_for_cvat.zip")
+    if save_photo:
+        print("zip ахрив для загрузки в CVAT: images_for_cvat.zip")
     # Создаем строку JSON под формат COCO
     # Извлекаем каждое изображение из папки и создаем список elements
     datagen = DataGen(input_folder)
     elements = datagen.process()
     # Инференс каждой фотографии
     inferencer = Inferencer(
-        elements, model_path=MODEL_PTH, classes_list=classes_COCO, conf_dict=dict_confs, iou=configs['iou']
+        elements, model_path=model_pth, classes_list=classes_coco, conf_dict=dict_confs, iou=configs['iou'], minimize_points=configs['minimize_points']
     )
     elements = inferencer.process()
     # Создаем JSON объект
-    converter = COCOConverter(elements, classes_CVAT, classes_COCO)
+    converter = COCOConverter(elements, classes_cvat, classes_coco)
     results = converter.convert_to_coco()
 
     # Записываем JSON в файл
@@ -145,14 +162,14 @@ def main(**kwargs):
     shutil.make_archive(result_folder, "zip", result_folder)
 
     # в терминале прописываем путь к результирующей папке
-    print(f"Аннотации находятся по указанному пути: {result_folder}.zip")
+    if cvat_json: print(f"Аннотации находятся по указанному пути: {result_folder}.zip")
 
     # Удаляем папку результирующую папку
     shutil.rmtree(result_folder)
 
     # Создадим json под CVAT проект
-    if configs['classes_CVAT']:
-        generate_and_save_class_list(classes_CVAT)
+    if cvat_json:
+        generate_and_save_class_list(classes_cvat)
 
 if __name__ == "__main__":
     main()
