@@ -14,12 +14,12 @@ Install all necessary libraries:
 
 `pip install -r requirements.txt`
 
-This repository supports all relevant models from Ultralytics: YOLOv8 for detection and segmentation, FastSAM, and YOLO-World (Real-Time Open-Vocabulary Object Detection).
+This repository supports all relevant models from Ultralytics: YOLOv8/v9(and lower) for detection and segmentation, FastSAM, and YOLO-World (Real-Time Open-Vocabulary Object Detection).
 
 ## Adaptive Commands
 To interact with the repository, you need to set the following command in the cmd terminal:
 
-`python main.py --img_folder=image_cars  --weights=yolov8m.pt  --annotations_zip=cars_annotations `
+`python main.py --img_folder=image_cars  --weights=yolov8m.pt  --annotations_zip=cars_annotations  -yaml_pth=configs.yaml --save_photo=True --cvat_json=True`
 
 
 **Table 1. Explanation of CLI command values**
@@ -28,9 +28,15 @@ To interact with the repository, you need to set the following command in the cm
 |---|-----------------------|-------------------------------------------------------------------------------------------------|
 | 1 | `--img_folder=`       | Path to the folder containing images                                                            |
 | 2 | `--weights=`          | Path to the model weights file                                                                  |
-| 5 | `--annotations_zip=`  | Path to the zip archive with annotations for images to be uploaded to CVAT                      |
+| 3 | `--yaml_pth=`         | The path to configuration yaml file                                                             |
+| 5 | `--save_photo=`       | Whether to create a file .zip photos to upload to CVAT                                          |
+| 5 | `--cvat_json`         | Should a json file with classes for CVAT be created                                             |
 
-The project also provides a configuration file where the parameter each class, confidentiality for each class, and the iou parameter are set.
+The project also provides a configuration file where the parameters each class in your custom or pretrained YOLO model, confidentiality for each class, the iou parameter are set and a parameter that includes the ability to minimize the number of points in the polygons of the final markup (True is advised).
+
+The keys in the "names" are the numbering of the classes in your model, and the values are the names in the CVAT project (`predictions.boxes.cls.cpu().int().tolist()`)
+The keys in the "confs" are also the numbering of the classes, and the values are the confidence parameter of each class of the model.
+
 An example of configuring a configuration file to configure defined classes and make the model confident in their presence:
 ```
 names:
@@ -46,17 +52,14 @@ confs:
   3: 0.5
   14: 0.6
 iou: 0.7
-save_foto: True # whether to create a file .zip photos to upload to CVAT
-classes_CVAT: True # should I create a json file with classes for CVAT
+minimize_points: False
 ```
 
 It is important to note that the number of confidentiality parameters must match the number of class names.
 
 [COCO classes supported by YOLO models][2] 
 
-The repository also optionally generates a json file for creating classes in the cvat project.
-
-Example:
+An example of json file being created for creating classes in a cat project:
 ```
 [
   {
@@ -96,7 +99,6 @@ Example:
   }
 ]
 ```
-The repository also generates a zip file with images to upload to the CVAT task
 
 [1]: https://docs.ultralytics.com/ru/models/
 [2]: https://github.com/ultralytics/ultralytics/blob/main/ultralytics/cfg/datasets/coco.yaml
