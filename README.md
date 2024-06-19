@@ -19,7 +19,7 @@ This repository supports all relevant models from Ultralytics: YOLOv8/v9(and low
 ## Adaptive Commands
 To interact with the repository, you need to set the following command in the cmd terminal:
 
-`python main.py --img_folder=image_cars  --weights=yolov8m.pt  --annotations_zip=cars_annotations  -yaml_pth=configs.yaml --save_photo=True --cvat_json=True`
+`python main.py --img_folder=image_cars  --weights=yolov8m.pt  --annotations_zip=cars_annotations  -yaml_pth=configs.yaml`
 
 
 **Table 1. Explanation of CLI command values**
@@ -43,13 +43,11 @@ names:
   0: person
   1: bicycle
   2: car
-  3: motorcycle
-  14: bird
+  14: birdы
 confs:
   0: 0.7
   1: 0.4
   2: 0.4
-  3: 0.5
   14: 0.6
 iou: 0.7
 minimize_points: False
@@ -80,20 +78,6 @@ An example of json file being created for creating classes in a cat project:
     "name": "car",
     "id": 2,
     "color": "#FAFCD4",
-    "type": "any",
-    "attributes": []
-  },
-  {
-    "name": "motorcycle",
-    "id": 3,
-    "color": "#0E7D25",
-    "type": "any",
-    "attributes": []
-  },
-  {
-    "name": "bird",
-    "id": 4,
-    "color": "#3738B7",
     "type": "any",
     "attributes": []
   }
