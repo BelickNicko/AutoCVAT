@@ -36,8 +36,10 @@ The project also provides a configuration file where the parameters each class i
 
 The keys in the "names" are the numbering of the classes in your model, and the values are the names in the CVAT project (`predictions.boxes.cls.cpu().int().tolist()`)
 The keys in the "confs" are also the numbering of the classes, and the values are the confidence parameter of each class of the model.
+It is important to understand that the values in the dictionary by the name key must match the names of the classes in your cvat project.
 
 An example of configuring a configuration file to configure defined classes and make the model confident in their presence:
+
 ```
 names:
   0: person
@@ -51,6 +53,7 @@ confs:
   14: 0.6
 iou: 0.7
 minimize_points: False
+
 ```
 
 It is important to note that the number of confidentiality parameters must match the number of class names.
