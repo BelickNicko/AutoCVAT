@@ -19,7 +19,7 @@ This repository supports all relevant models from Ultralytics: YOLOv8/v9(and low
 ## Adaptive Commands
 To interact with the repository, you need to set the following command in the cmd terminal:
 
-`python main.py --img_folder=image_cars  --weights=yolov8m.pt  --annotations_zip=cars_annotations  -yaml_pth=configs.yaml`
+`python main.py --img_folder=image_cars --weights=yolov8m.pt --annotations_zip=cars_annotations --yaml_pth=configs.yaml`
 
 
 **Table 1. Explanation of CLI command values**
