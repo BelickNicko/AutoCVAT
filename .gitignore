@@ -2,9 +2,6 @@
 *.zip
 *.json
 *.png
-*.jpeg
-*.jpg
-*.JPG
 *.pt
 # Игнорировать директории и их содержимое
 **/test_images/

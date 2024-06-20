@@ -64,7 +64,9 @@ If the "segment" parameter is True, but your model only supports detection, a wa
 If you need to get the annotations of specific classes from YOLO, then you can see their numbers:
 [COCO classes supported by YOLO models][2] 
 
-An example of json file being created for creating classes in a cat project:
+
+
+An example of json file for creating classes in a cat project:
 ```
 [
   {
@@ -90,6 +92,9 @@ An example of json file being created for creating classes in a cat project:
   }
 ]
 ```
+The contents of the json file must be inserted in "Raw" in the header of the project you created in CVAT:
+
+![Cvat example](documentation/example_cvat.jpg)
 
 [1]: https://docs.ultralytics.com/ru/models/
 [2]: https://github.com/ultralytics/ultralytics/blob/main/ultralytics/cfg/datasets/coco.yaml

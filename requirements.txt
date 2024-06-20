@@ -2,4 +2,4 @@ ultralytics
 click
 opencv-python
 shapely
-yaml
+PyYAML
