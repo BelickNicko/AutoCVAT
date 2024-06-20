@@ -21,6 +21,7 @@ class Inferencer:
     def __init__(
         self,
         elements,
+        segment=False,
         model_path="yolov8m.pt",
         imgsz=640,
         conf=0.4,
@@ -30,7 +31,7 @@ class Inferencer:
         minimize_points=True,
         conf_dict={},
     ) -> None:
-
+        self.segment = segment
         self.model_path = model_path
         self.imgsz = imgsz
         self.conf = conf
@@ -51,6 +52,7 @@ class Inferencer:
             DataGen: Обработанный набор данных с результатами вывода.
         """
         mask_id = 0
+        printed = False
 
         for element in self.elements:
             predictions = self.model.predict(
@@ -92,40 +94,45 @@ class Inferencer:
             ]
             # Для каждой детекции находим ее номер относительно всего набора фотографий
             element.annotations_id = [mask_id + i for i in range(len(filtered_indices))]
-            try:
-                # список масок под формат COCO
-                if self.minimize_points:
-                    element.detected_masks = self.minimize_contours(
-                    predictions.masks.data.cpu().numpy(), filtered_indices, element.image
-                )
-                else:
-                    detected_masks = [
-                    mask.flatten()
-                    for i, mask in enumerate(predictions.masks.xy)
-                    if i in filtered_indices
-                ]
-                    element.detected_masks = [
-                        [
-                            float(detected_masks[i][j]) if j % 2 == 1 else float(detected_masks[i][j])
-                            for j in range(len(detected_masks[i]))
-                        ]
-                        for i in range(len(detected_masks))
+            if self.segment:
+                try:
+                    # список масок под формат COCO
+                    if self.minimize_points:
+                        element.detected_masks = self.minimize_contours(
+                        predictions.masks.data.cpu().numpy(), filtered_indices, element.image
+                    )
+                    else:
+                        detected_masks = [
+                        mask.flatten()
+                        for i, mask in enumerate(predictions.masks.xy)
+                        if i in filtered_indices
                     ]
+                        element.detected_masks = [
+                            [
+                                float(detected_masks[i][j]) if j % 2 == 1 else float(detected_masks[i][j])
+                                for j in range(len(detected_masks[i]))
+                            ]
+                            for i in range(len(detected_masks))
+                        ]
 
-                element.areas = [
-                    Polygon(mask).area
-                    for i, mask in enumerate(predictions.masks.xy)
-                    if i in filtered_indices
-                ]
-                # ставим флаг на групповой объект
-                element.isscrowd = 0
-            except AttributeError:
-                # если модель не сегментационная, то список масок пуст и мы вычисляем площади по bbox
+                    element.areas = [
+                        Polygon(mask).area
+                        for i, mask in enumerate(predictions.masks.xy)
+                        if i in filtered_indices
+                    ]
+                    # ставим флаг на групповой объект
+                    element.isscrowd = 0
+                except AttributeError:
+                    # если модель не сегментационная, то список масок пуст и мы вычисляем площади по bbox
+                    if not printed:
+                        print('Модель, веса которой вы указали, не поддерживает сегментацию!')
+                        printed = True
+                    element.detected_masks = []
+                    element.areas = [box[2] * box[3] for box in element.bbox]
+            else:
                 element.detected_masks = []
                 element.areas = [box[2] * box[3] for box in element.bbox]
-
             mask_id += len(element.annotations_id)
-
         return self.elements
 
     def minimize_contours(self, predictions_masks_xy, filtered_indices, image):

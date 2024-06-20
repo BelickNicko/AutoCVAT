@@ -97,7 +97,7 @@ def main(**kwargs):
     # Загрузка данных из YAML файла
     with open(configs, "r") as yaml_file:
         configs = yaml.safe_load(yaml_file)
-        
+
     # Получение всех ключей и всех значений
     classes_cvat = list(configs["names"].values())
     classes_coco = list(configs["names"].keys())
@@ -145,7 +145,13 @@ def main(**kwargs):
     elements = datagen.process()
     # Инференс каждой фотографии
     inferencer = Inferencer(
-        elements, model_path=model_pth, classes_list=classes_coco, conf_dict=dict_confs, iou=configs['iou'], minimize_points=configs['minimize_points']
+        elements,
+        segment = configs['segment'],
+        model_path=model_pth,
+        classes_list=classes_coco,
+        conf_dict=dict_confs,
+        iou=configs["iou"],
+        minimize_points=configs["minimize_points"],
     )
     elements = inferencer.process()
     # Создаем JSON объект

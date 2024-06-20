@@ -11,4 +11,5 @@ confs:
   3: 0.5
   14: 0.6
 iou: 0.7
-minimize_points: False
+minimize_points: True
+segment: True
