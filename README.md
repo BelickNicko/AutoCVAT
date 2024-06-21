@@ -1,9 +1,14 @@
-# Auto-labling CVAT
-Auxiliary tool, auto-labling. 
-Intended use: for tasks related to the training of custom solutions based on [Yolo models][1]  
-What it does: implements the inference and converts the output to the Coco 1.0 format supported by CVAT
+# __Auto-labling CVAT__
 
-## Local Setup
+Creating __automatic annotation in CVAT__ using pre-trained [ultralytics models][1]. It supports both bounding box annotation for __object detection__ tasks and polygon annotation for __instance segmentation__ tasks.
+
+You need to provide the path to the folder with images that will be uploaded to the task in CVAT. As a result of the program's operation, a zip archive with annotations obtained based on the neural network inference will be formed.
+
+All that remains to be done: after creating the task, go to the Actions panel and select `Upload annotations`. Then, choose `COCO 1.0` in the `Import format` section and upload the archive.
+
+![CVAT Auto-labling example](documentation/upload_example.gif)
+
+## Installation:
 You need to have Python 3.8 or newer installed.
 Run the following commands sequentially in your terminal:
 
@@ -14,12 +19,12 @@ Install all necessary libraries:
 
 ```pip install -r requirements.txt```
 
-This repository supports all relevant models from Ultralytics: YOLOv8/v9(and lower) for detection and segmentation, FastSAM, and YOLO-World (Real-Time Open-Vocabulary Object Detection).
+__This repository supports all relevant models from Ultralytics:__ YOLOv8/v9/v10 (and lower) for detection and segmentation, FastSAM, and YOLO-World (Real-Time Open-Vocabulary Object Detection).
 
 ## How to run the code:
 To interact with the repository, you need to set the following command in the cmd terminal:
 ```
-python AutoCvat.py --img_folder="images" --weights=yolov8m-seg.pt  --yaml_pth=configs.yaml
+python AutoCvat.py --img_folder="images" --weights=yolov8m-seg.pt --yaml_pth=configs.yaml
 ```
 An example of a more fine-tuning with all possible CLI parameters:
 ```
