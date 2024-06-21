@@ -4,7 +4,7 @@ Intended use: for tasks related to the training of custom solutions based on [Yo
 What it does: implements the inference and converts the output to the Coco 1.0 format supported by CVAT
 
 ## Local Setup
-You need to have Python 3.10 or newer installed.
+You need to have Python 3.8 or newer installed.
 Run the following commands sequentially in your terminal:
 
 1. Clone this repository to your local machine.
@@ -12,25 +12,32 @@ Run the following commands sequentially in your terminal:
 
 Install all necessary libraries:
 
-pip install -r requirements.txt
+```pip install -r requirements.txt```
 
 This repository supports all relevant models from Ultralytics: YOLOv8/v9(and lower) for detection and segmentation, FastSAM, and YOLO-World (Real-Time Open-Vocabulary Object Detection).
 
-## CLI Commands
+## How to run the code:
 To interact with the repository, you need to set the following command in the cmd terminal:
+```
+python AutoCvat.py --img_folder="images" --weights=yolov8m-seg.pt  --yaml_pth=configs.yaml
+```
+An example of a more fine-tuning with all possible CLI parameters:
+```
+python AutoCvat.py --img_folder=image_cars --weights=yolov8m-seg.pt --annotations_zip=cars_annotations --yaml_pth=configs.yaml --default_conf=0.2 --cvat_json=True --cvat_json=True
+```
 
-```python AutoCvat.py --img_folder=image_cars  --weights=yolov8m.pt  --annotations_zip=cars_annotations  -yaml_pth=configs.yaml```
+Table 1. Explanation of CLI command values:
 
+| № | Command               | Description                                                                                   | Default value|
+|---|-----------------------|-----------------------------------------------------------------------------------------------|--------------|
+| 1 | --img_folder=       | Path to the folder containing images                                                            |  -           |
+| 2 | --weights=          | Path to the ultralytics model weights file (ex: yolov8m-seg.pt, yolov9c.pt, FastSAM-x.pt)       |  -           |
+| 3 | --yaml_pth=         | The path to configuration yaml file                                                             | configs.yaml |
+| 5 | --save_photo=       | Whether to create a file .zip photos to upload to CVAT                                          | False        |
+| 5 | --cvat_json=        | Should a json file with classes for CVAT be created                                             | False        |
+| 6 | --default_conf=     | The default value of the confidence of all model classes                                        | 0.5          |
 
-Table 1. Explanation of CLI command values
-
-| № | Command               | Description                                                                                     |
-|---|-----------------------|-------------------------------------------------------------------------------------------------|
-| 1 | --img_folder=       | Path to the folder containing images                                                            |
-| 2 | --weights=          | Path to the model weights file                                                                  |
-| 3 | --yaml_pth=         | The path to configuration yaml file                                                             |
-| 5 | --save_photo=       | Whether to create a file .zip photos to upload to CVAT                                          |
-| 5 | --cvat_json         | Should a json file with classes for CVAT be created                                             |
+For Russian users, there is a detailed video presentation of this project. YouTube video in Russian is available at this [link]().
 
 # Configuration file
 
@@ -96,5 +103,5 @@ The contents of the json file must be inserted in "Raw" in the header of the pro
 
 ![Cvat example](documentation/example_cvat.jpg)
 
-[1]: https://docs.ultralytics.com/ru/models/
+[1]: https://docs.ultralytics.com/models/
 [2]: https://github.com/ultralytics/ultralytics/blob/main/ultralytics/cfg/datasets/coco.yaml
