@@ -1,5 +1,6 @@
 import json
 import numpy as np
+from collections import defaultdict
 
 
 class COCOConverter:
@@ -22,9 +23,14 @@ class COCOConverter:
             category_names (list): Список имен категорий объектов.
         """
         self.elements = elements
-        self.category_names = category_names
-        self.category_id = category_id
-
+        #self.category_names = category_names
+        #self.category_id = category_id
+        #self.category_dict = dict(zip(category_names, category_id))
+        category_dict = defaultdict(list)
+        for name, id_ in zip(category_names, category_id):
+            category_dict[name].append(id_)
+        self.category_dict = dict(category_dict)
+    
     def convert_to_coco(self):
         """Конвертирует данные в формат COCO.
 
@@ -33,8 +39,8 @@ class COCOConverter:
         """
         # Создание списка категорий
         categories = [
-            {"id": self.category_id[idx] + 1, "name": name, "supercategory": ""}
-            for idx, name in enumerate(self.category_names)
+            {"id": self.category_dict[name][0] + 1, "name": name, "supercategory": ""}
+            for name in self.category_dict
         ]
 
         # Создание списка изображений
@@ -56,15 +62,16 @@ class COCOConverter:
         annotations = []
         annotation_id = 1
         for elem in self.elements:
+            
             counter = 0
             for bbox, area, category_id in zip(elem.bbox, elem.areas, elem.category_id):
                 annotation = {
                     "id": annotation_id,
                     "image_id": elem.image_id,
-                    "category_id": int(category_id),
+                    "category_id": int(list(filter(lambda sublist: category_id-1 in sublist, self.category_dict.values()))[0][0] + 1),
                     "segmentation": [],
-                    "area": area,
                     "bbox": bbox,
+                    "area": area,
                     "iscrowd": elem.iscrowd,
                 }
                 if elem.detected_masks:

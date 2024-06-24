@@ -64,6 +64,7 @@ class Inferencer:
                 classes=self.classes,
                 retina_masks=True,
             )
+
             predictions = predictions[0]
             # фильтрация по confidence
             if len(self.conf_dict) != 0:
@@ -124,9 +125,6 @@ class Inferencer:
                     element.isscrowd = 0
                 except AttributeError:
                     # если модель не сегментационная, то список масок пуст и мы вычисляем площади по bbox
-                    if not printed:
-                        print('Модель, веса которой вы указали, не поддерживает сегментацию!')
-                        printed = True
                     element.detected_masks = []
                     element.areas = [box[2] * box[3] for box in element.bbox]
             else:

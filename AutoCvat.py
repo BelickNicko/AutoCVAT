@@ -87,6 +87,12 @@ def generate_and_save_class_list(original_classes, file_name="new_classes.json")
     help="Should I create a json file with classes for CVAT",
     type=bool,
 )
+@click.option(
+    "--conf",
+    default=None,
+    help="The confidence parameter for all classes, condidences from config don`t use",
+    type=float,
+)
 def main(**kwargs):
     result_folder = kwargs["annotations_zip"]
     model_pth = kwargs["weights"]
@@ -94,6 +100,7 @@ def main(**kwargs):
     configs =  kwargs['yaml_pth']
     save_photo = bool(kwargs['save_photo'])
     cvat_json =  bool(kwargs['cvat_json'])
+    conf = kwargs['conf']
     # Загрузка данных из YAML файла
     with open(configs, "r") as yaml_file:
         configs = yaml.safe_load(yaml_file)
@@ -144,12 +151,15 @@ def main(**kwargs):
     datagen = DataGen(input_folder)
     elements = datagen.process()
     # Инференс каждой фотографии
+    if conf is not None: dict_confs = {}
+    else: conf = 0.5
     inferencer = Inferencer(
         elements,
         segment = configs['segment'],
         model_path=model_pth,
         classes_list=classes_coco,
         conf_dict=dict_confs,
+        conf=conf,
         iou=configs["iou"],
         minimize_points=configs["minimize_points"],
     )
@@ -168,7 +178,7 @@ def main(**kwargs):
     shutil.make_archive(result_folder, "zip", result_folder)
 
     # в терминале прописываем путь к результирующей папке
-    if cvat_json: print(f"Аннотации находятся по указанному пути: {result_folder}.zip")
+    print(f"Аннотации находятся по указанному пути: {result_folder}.zip")
 
     # Удаляем папку результирующую папку
     shutil.rmtree(result_folder)
