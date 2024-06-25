@@ -127,7 +127,8 @@ def main(**kwargs):
     os.mkdir(result_folder)
     os.mkdir(result_folder + "/annotations")
     os.mkdir(result_folder + "/images")
-    os.mkdir("images_for_cvat")
+    if save_photo: 
+        os.mkdir("images_for_cvat")
     # Получаем список файлов в исходной папке
     files = os.listdir(input_folder)
     # Копируем каждый файл из исходной папки в целевую папку
@@ -139,12 +140,11 @@ def main(**kwargs):
         )  # Используем shutil.copy2 для копирования с метаданными
         if save_photo:
             shutil.copy2(source_file, os.path.join("images_for_cvat", file_name))
-    # Создаем zip ахрив для загрузки в CVAT
-    shutil.make_archive("images_for_cvat", "zip", "images_for_cvat")
-    # Удаляем папку изображений для загрузки в CVAT
-    shutil.rmtree("images_for_cvat")
-    # в терминале прописываем путь к результирующей папке
     if save_photo:
+        # Создаем zip ахрив для загрузки в CVAT
+        shutil.make_archive("images_for_cvat", "zip", "images_for_cvat")
+        # Удаляем папку изображений для загрузки в CVAT
+        shutil.rmtree("images_for_cvat")
         print("zip ахрив для загрузки в CVAT: images_for_cvat.zip")
     # Создаем строку JSON под формат COCO
     # Извлекаем каждое изображение из папки и создаем список elements
