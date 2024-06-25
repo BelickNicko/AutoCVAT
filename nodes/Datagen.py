@@ -4,46 +4,46 @@ from elements.Element import Element
 
 
 class DataGen:
-    """Класс для генерации данных изображений.
+    """Class for generating image data.
 
     Attributes:
-        folder_path (str): Путь к папке с изображениями.
+        folder_path (str): Path to the folder with images.
     """
 
     def __init__(self, folder_path):
-        """Инициализация объекта класса DataGen.
+        """Initialization of the DataGen object.
 
         Args:
-            folder_path (str): Путь к папке с изображениями.
+            folder_path (str): Path to the folder with images.
         """
-        # Проверяем, существует ли папка
+        # Check if the folder exists
         self.folder_path = folder_path
 
     def process(self):
-        """Обработка изображений в папке и создание элементов.
+        """Processing images in the folder and creating elements.
 
         Returns:
-            list: Список объектов Element, содержащих информацию об изображениях.
+            list: List of Element objects containing image information.
         """
         if not os.path.isdir(self.folder_path):
-            print(f'Папка "{self.folder_path}" не существует')
+            print(f'Folder "{self.folder_path}" does not exist')
             return
 
         data_all_elements = []
-        # Проходим по всем файлам в папке
+        # Iterate through all files in the folder
         for num, filename in enumerate(os.listdir(self.folder_path)):
             file_parh = os.path.join(self.folder_path, filename)
-            # Проверяем, является файл изображением
+            # Check if the file is an image
             if os.path.isfile(file_parh) and any(
                 filename.lower().endswith(ext) for ext in [".jpg", ".jpeg", ".png"]
             ):
                 try:
-                    # считываем изображение
+                    # Read the image
                     img = cv2.imread(file_parh)
                     if img is not None:
                         image_id = num + 1
                         height, width, _ = img.shape
-                        # добавляем элемент в список
+                        # Add the element to the list
                         data_all_elements.append(
                             Element(
                                 image=img,
@@ -55,6 +55,6 @@ class DataGen:
                         )
 
                 except Exception as e:
-                    print(f"Ошибка при обработке файла '{filename}': {e}")
+                    print(f"Error processing file '{filename}': {e}")
 
         return data_all_elements

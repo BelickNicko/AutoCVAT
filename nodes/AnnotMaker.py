@@ -4,23 +4,23 @@ from collections import defaultdict
 
 
 class COCOConverter:
-    """Класс для конвертации данных о детекциях в формат COCO (Common Objects in Context).
+    """Class for converting detection data to COCO format (Common Objects in Context).
 
     Attributes:
-        elements (list): Список элементов, содержащих информацию о детекциях.
-        category_names (list): Список имен категорий объектов.
+        elements (list): List of elements containing detection information.
+        category_names (list): List of object category names.
 
     Methods:
-        __init__: Инициализирует объект класса COCOConverter.
-        convert_to_coco: Конвертирует данные в формат COCO.
+        __init__: Initializes the COCOConverter object.
+        convert_to_coco: Converts the data to COCO format.
     """
 
     def __init__(self, elements, category_names, category_id):
-        """Инициализация объекта класса COCOConverter.
+        """Initialization of the COCOConverter object.
 
         Args:
-            elements (list): Список элементов, содержащих информацию о детекциях.
-            category_names (list): Список имен категорий объектов.
+            elements (list): List of elements containing detection information.
+            category_names (list): List of object category names.
         """
         self.elements = elements
         category_dict = defaultdict(list)
@@ -29,18 +29,18 @@ class COCOConverter:
         self.category_dict = dict(category_dict)
     
     def convert_to_coco(self):
-        """Конвертирует данные в формат COCO.
+        """Converts the data to COCO format.
 
         Returns:
-            str: JSON-строка, представляющая данные в формате COCO.
+            str: JSON string representing the data in COCO format.
         """
-        # Создание списка категорий
+        # Creating a list of categories
         categories = [
             {"id": self.category_dict[name][0] + 1, "name": name, "supercategory": ""}
             for name in self.category_dict
         ]
 
-        # Создание списка изображений
+        # Creating a list of images
         images = [
             {
                 "id": elem.image_id,
@@ -55,7 +55,7 @@ class COCOConverter:
             for elem in self.elements
         ]
 
-        # Создание списка аннотаций
+        # Creating a list of annotations
         annotations = []
         annotation_id = 1
         for elem in self.elements:
@@ -80,7 +80,7 @@ class COCOConverter:
                 annotation_id += 1
                 counter += 1
 
-        # Создание словаря COCO
+        # Creating the COCO dictionary
         coco_data = {
             "licenses": [{"name": "", "id": 0, "url": ""}],
             "info": {
@@ -96,7 +96,7 @@ class COCOConverter:
             "annotations": annotations,
         }
 
-        # Преобразование в строку JSON
+        # Convert to JSON string
         coco_json = json.dumps(coco_data)
 
         return coco_json

@@ -1,7 +1,7 @@
 import numpy as np
 
 class Element:
-    # Класс, содержаций информацию о конкретном кропе
+    # Class containing information about a specific crop
     def __init__(
         self, image: np.ndarray, image_id: int, file_name: str, width: float, height: float
     ) -> None:
@@ -9,10 +9,10 @@ class Element:
         self.file_name = file_name
         self.width = width
         self.height = height
-        self.image = image  # Исходное изображение
-        self.category_id = None  # Список детектируемых классов
-        self.bbox = None  # Список списков с координатами xyxy боксов
-        self.detected_masks = []  # Список np массивов с масками в случае yolo-seg
+        self.image = image  # Original image
+        self.category_id = None  # List of detected classes
+        self.bbox = None  # List of lists with xyxy box coordinates
+        self.detected_masks = []  # List of np arrays with masks in case of yolo-seg
         self.annotations_id = None
-        self.areas = None  # Список площадей bbox/масок в зависимости от решаемой задачи
-        self.iscrowd = 0  # 0 | 1 объект не группа|группа
+        self.areas = None  # List of areas of bbox/masks depending on the task
+        self.iscrowd = 0  # 0 | 1 object is not a group | group

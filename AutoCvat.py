@@ -1,23 +1,23 @@
-# Библиотеки для работы с файлами и директориями
+# Libraries for working with files and directories
 import os
 import shutil
 import yaml
 import json
 
-# Библиотека для создания CLI (Command Line Interface) интерфейсов
+# Library for creating CLI (Command Line Interface) interfaces
 import click
 
-# Кастомные модули и классы
+# Custom modules and classes
 from nodes.Datagen import DataGen
 from nodes.Inference import Inferencer
 from nodes.AnnotMaker import COCOConverter
 
-# вспомогательные библиотеки
+# auxiliary libraries
 import random
 
 
 class LengthMismatchError(Exception):
-    """Кастомное исключение для несоответствия длины списка классов и словаря порогов уверенности."""
+    """Custom exception for length mismatch between class list and confidence threshold dictionary."""
 
     def __init__(self, message):
         super().__init__(message)
@@ -25,48 +25,48 @@ class LengthMismatchError(Exception):
 
 def generate_and_save_class_list(original_classes, file_name="new_classes.json"):
     """
-    Генерирует список словарей классов с рандомными цветами и сохраняет его в JSON файл.
+    Generates a list of class dictionaries with random colors and saves it to a JSON file.
 
-    Параметры:
-        original_classes (list): Список классов.
-        file_name (str, optional): Имя файла, в который будет сохранен список классов.
-            По умолчанию используется "new_classes.json".
+    Parameters:
+        original_classes (list): List of classes.
+        file_name (str, optional): Name of the file to save the class list.
+            Defaults to "new_classes.json".
 
-    Возвращает:
+    Returns:
         None
     """
-    # Генерация случайного неповторяющегося цвета для каждого класса
+    # Generate a random unique color for each class
     colors = ["#" + "".join(random.choices("0123456789ABCDEF", k=6)) for _ in original_classes]
 
-    # Создание нового списка словарей с рандомными цветами и индексами в качестве id
+    # Create a new list of dictionaries with random colors and indexes as id
     new_classes = []
     for idx, cls in enumerate(original_classes):
         cls_dict = {"name": cls, "id": idx, "color": colors[idx], "type": "any", "attributes": []}
         new_classes.append(cls_dict)
 
-    # Сохранение нового списка в файл
+    # Save the new list to a file
     with open(file_name, "w") as file:
         json.dump(new_classes, file, indent=2)
-    print(f"JSON для CVAT сохранен в файл {file_name}")
+    print(f"JSON for CVAT saved to file {file_name}")
 
 
 @click.command()
 @click.option(
     "--img_folder",
     default="img_folder",
-    help="Папка с изображениями (task из CVAT)",
+    help="Folder with images (task from CVAT)",
     type=str,
 )
 @click.option(
     "--weights",
     default="yolov8m.pt",
-    help="Путь к весам модели Yolo расширения .pt",
+    help="Path to the Yolo model weights file with .pt extension",
     type=str,
 )
 @click.option(
     "--annotations_zip",
     default="annotations",
-    help="Названия zip архива аннотаций формата COCO CVAT",
+    help="Name of the COCO CVAT annotation zip archive",
     type=str,
 )
 @click.option(
@@ -78,7 +78,7 @@ def generate_and_save_class_list(original_classes, file_name="new_classes.json")
 @click.option(
     "--save_photo",
     default=False,
-    help="Whether to create a file .zip photos to upload to CVAT",
+    help="Whether to create a zip file with photos to upload to CVAT",
     type=bool,
 )
 @click.option(
@@ -90,72 +90,73 @@ def generate_and_save_class_list(original_classes, file_name="new_classes.json")
 @click.option(
     "--conf",
     default=None,
-    help="The confidence parameter for all classes, condidences from config don`t use",
+    help="The confidence parameter for all classes, confidences from config don't use",
     type=float,
 )
 def main(**kwargs):
     result_folder = kwargs["annotations_zip"]
     model_pth = kwargs["weights"]
     input_folder = kwargs["img_folder"]
-    configs =  kwargs['yaml_pth']
+    configs = kwargs['yaml_pth']
     save_photo = bool(kwargs['save_photo'])
-    cvat_json =  bool(kwargs['cvat_json'])
+    cvat_json = bool(kwargs['cvat_json'])
     conf = kwargs['conf']
-    # Загрузка данных из YAML файла
+    # Load data from YAML file
     with open(configs, "r") as yaml_file:
         configs = yaml.safe_load(yaml_file)
 
-    # Получение всех ключей и всех значений
+    # Get all keys and all values
     classes_cvat = list(configs["names"].values())
     classes_coco = list(configs["names"].keys())
     try:
         dict_confs = configs["conf"]
         if classes_coco != list(dict_confs):
             raise LengthMismatchError(
-                "Cписок классов и список ключей словаря порогов уверенности не совпадают. Каждый класс должен соответствовать порогу уверенности."
+                "Class list and confidence threshold dictionary keys list do not match. Each class must correspond to a confidence threshold."
             )
     except KeyError:
         dict_confs = {}
-    # Если результирующая папка уже существует, удаляем ее и создаем новую
+    # If the result folder already exists, delete it and create a new one
     if os.path.exists(result_folder):
         shutil.rmtree(result_folder)
-    # Если папка для выгрузки изображений существует, удаляем ее и создаем новую
+    # If the image upload folder exists, delete it and create a new one
     if os.path.exists("images_for_cvat"):
         shutil.rmtree("images_for_cvat")
 
-    # Создаем результирующую папку для аннотаций и изображений для загрузки в cvat
+    # Create a result folder for annotations and images for uploading to cvat
     os.mkdir(result_folder)
     os.mkdir(result_folder + "/annotations")
     os.mkdir(result_folder + "/images")
-    if save_photo: 
+    if save_photo:
         os.mkdir("images_for_cvat")
-    # Получаем список файлов в исходной папке
+    # Get the list of files in the source folder
     files = os.listdir(input_folder)
-    # Копируем каждый файл из исходной папки в целевую папку
+    # Copy each file from the source folder to the target folder
     for file_name in files:
         source_file = os.path.join(input_folder, file_name)
         destination_file = os.path.join(result_folder + "/images", file_name)
         shutil.copy2(
             source_file, destination_file
-        )  # Используем shutil.copy2 для копирования с метаданными
+        )  # Use shutil.copy2 to copy with metadata
         if save_photo:
             shutil.copy2(source_file, os.path.join("images_for_cvat", file_name))
     if save_photo:
-        # Создаем zip ахрив для загрузки в CVAT
+        # Create a zip archive for uploading to CVAT
         shutil.make_archive("images_for_cvat", "zip", "images_for_cvat")
-        # Удаляем папку изображений для загрузки в CVAT
+        # Delete the image folder for uploading to CVAT
         shutil.rmtree("images_for_cvat")
-        print("zip ахрив для загрузки в CVAT: images_for_cvat.zip")
-    # Создаем строку JSON под формат COCO
-    # Извлекаем каждое изображение из папки и создаем список elements
+        print("Zip archive for uploading to CVAT: images_for_cvat.zip")
+    # Create a JSON string in COCO format
     datagen = DataGen(input_folder)
     elements = datagen.process()
-    # Инференс каждой фотографии
-    if conf is not None: dict_confs = {}
-    else: conf = 0.5
+    # Inference each photo
+    if conf is not None:
+        dict_confs = {}
+    else:
+        conf = 0.5
     inferencer = Inferencer(
         elements,
-        segment = configs['segment'],
+        segment=configs['segment'],
         model_path=model_pth,
         classes_list=classes_coco,
         conf_dict=dict_confs,
@@ -164,26 +165,26 @@ def main(**kwargs):
         minimize_points=configs["minimize_points"],
     )
     elements = inferencer.process()
-    # Создаем JSON объект
+    # Create a JSON object
     converter = COCOConverter(elements, classes_cvat, classes_coco)
     results = converter.convert_to_coco()
 
-    # Записываем JSON в файл
+    # Write JSON to file
     output_file_path = os.path.join(result_folder + "/annotations", "instances_default.json")
 
     with open(output_file_path, "w") as output_file:
         output_file.write(results)
 
-    # Создаем zip-архив из результирующей папки
+    # Create a zip archive from the result folder
     shutil.make_archive(result_folder, "zip", result_folder)
 
-    # в терминале прописываем путь к результирующей папке
-    print(f"Аннотации находятся по указанному пути: {result_folder}.zip")
+    # Print the path to the result folder in the terminal
+    print(f"Annotations are located at: {result_folder}.zip")
 
-    # Удаляем папку результирующую папку
+    # Delete the result folder
     shutil.rmtree(result_folder)
 
-    # Создадим json под CVAT проект
+    # Create a json for the CVAT project
     if cvat_json:
         generate_and_save_class_list(classes_cvat)
 
