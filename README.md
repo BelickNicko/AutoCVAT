@@ -40,7 +40,7 @@ Table 1. Explanation of CLI command values:
 | 3 | --yaml_pth=         | The path to configuration yaml file                                                             | configs.yaml |
 | 5 | --save_photo=       | Whether to create a file .zip photos to upload to CVAT                                          | False        |
 | 5 | --cvat_json=        | Should a json file with classes for CVAT be created                                             | False        |
-| 6 | --default_conf=     | The default value of the confidence of all model classes                                        | 0.5          |
+| 6 | --default_conf=     | The default value of the confidence of all model classes, condidences from config file don`t use | 0.5          |
 
 For Russian users, there is a detailed video presentation of this project. YouTube video in Russian is available at this [link]().
 
@@ -73,6 +73,28 @@ It is important to note that the number of confidentiality parameters must match
 
 If the "segment" parameter is True, but your model only supports detection, a warning will be displayed in the terminal, and at the output you will receive the annotations from the detector.
 
+You can also combine several classes into one by giving them the same name in the configuration class, as in the example:
+
+```
+names:
+  0: person
+  1: car
+  2: car
+  3: car
+  14: bird
+confs:
+  0: 0.7
+  1: 0.4
+  2: 0.4
+  3: 0.5
+  14: 0.3
+
+iou: 0.7
+minimize_points: True
+segment: True
+```
+At the exit you will get:
+![Cvat example union classes](documentation/example_class_union.jpg)
 If you need to get the annotations of specific classes from YOLO, then you can see their numbers:
 [COCO classes supported by YOLO models][2] 
 

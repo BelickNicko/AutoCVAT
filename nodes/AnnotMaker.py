@@ -23,9 +23,6 @@ class COCOConverter:
             category_names (list): Список имен категорий объектов.
         """
         self.elements = elements
-        #self.category_names = category_names
-        #self.category_id = category_id
-        #self.category_dict = dict(zip(category_names, category_id))
         category_dict = defaultdict(list)
         for name, id_ in zip(category_names, category_id):
             category_dict[name].append(id_)
