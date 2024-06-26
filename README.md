@@ -118,22 +118,20 @@ from ultralytics import YOLO
 model = YOLO("yolov8s-world.pt")  # or select yolov8m/l-world.pt
 
 # Define custom classes
-model.set_classes(["fork", "spoon"])
+model.set_classes(["dinosaur", "piano"])
 
 # Save the model with the defined offline vocabulary
 model.save("custom_yolov8s.pt")
 ```
 Then you can use AutoCvat to get the annotations using custom weights:
 
-<div style="text-align: center;">
-    <img src="documentation/yolo_world_example.jpg" alt="Cvat YOLO-World example" width="500" height="600"/>
-</div>
+![Cvat YOLO-World example](documentation/yolo_world_example.jpg){width=250px}
 
 ## How to create lables for your CVAT project
 If you will set cli command `--cvat_json=True`, you will get json file containing everything you need to create a project for your auto annotations.
 The contents of the json file must be inserted in "Raw" in the header of the project you created in CVAT:
 
-![Cvat example](documentation/cvat_json.gif)
+![Cvat example](documentation/cvat_json.gif){ width=300px }
 
 [1]: https://docs.ultralytics.com/models/
 [2]: https://github.com/ultralytics/ultralytics/blob/main/ultralytics/cfg/datasets/coco.yaml
