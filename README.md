@@ -133,6 +133,9 @@ The contents of the json file must be inserted in "Raw" in the header of the pro
 
 ![Cvat example](documentation/cvat_json.gif)
 
+### **Special thanks to [Dmitry Kolesnikov][4]**
+
 [1]: https://docs.ultralytics.com/models/
 [2]: https://github.com/ultralytics/ultralytics/blob/main/ultralytics/cfg/datasets/coco.yaml
 [3]: https://docs.ultralytics.com/models/yolo-world/
+[4]: https://github.com/Koldim2001
