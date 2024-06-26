@@ -28,7 +28,7 @@ python AutoCvat.py --img_folder="images" --weights=yolov8m-seg.pt --yaml_pth=con
 ```
 An example of a more fine-tuning with all possible CLI parameters:
 ```
-python AutoCvat.py --img_folder=image_cars --weights=yolov8m-seg.pt --annotations_zip=cars_annotations --yaml_pth=configs.yaml --default_conf=0.2 --cvat_json=True --cvat_json=True
+python AutoCvat.py --img_folder=image_cars --weights=yolov8m-seg.pt --annotations_zip=cars_annotations --yaml_pth=configs.yaml --default_conf=0.2 --cvat_json=True --save_photo=True
 ```
 
 Table 1. Explanation of CLI command values:
@@ -44,7 +44,7 @@ Table 1. Explanation of CLI command values:
 
 For Russian users, there is a detailed video presentation of this project. YouTube video in Russian is available at this [link]().
 
-# Configuration file
+## Configuration file
 
 The project also provides a configuration file where the parameters each class in your custom or pretrained YOLO model, confidentiality for each class, the iou parameter are set, parameter "minimize_points", that includes the ability to minimize the number of points in the polygons of the final markup (True is advised) and "segment" parameter, which sets the issue you want to solve True - instance segmentation, False - detection
 
@@ -73,6 +73,7 @@ It is important to note that the number of confidentiality parameters must match
 
 If the "segment" parameter is True, but your model only supports detection, a warning will be displayed in the terminal, and at the output you will receive the annotations from the detector.
 
+## Сlasses combining 
 You can also combine several classes into one by giving them the same name in the configuration class, as in the example:
 
 ```
@@ -95,40 +96,15 @@ segment: True
 ```
 At the exit you will get:
 ![Cvat example union classes](documentation/example_class_union.jpg)
+
 If you need to get the annotations of specific classes from YOLO, then you can see their numbers:
 [COCO classes supported by YOLO models][2] 
 
+#  Json file for creating classes in a cat project
 
-
-An example of json file for creating classes in a cat project:
-```
-[
-  {
-    "name": "person",
-    "id": 0,
-    "color": "#CC3D90",
-    "type": "any",
-    "attributes": []
-  },
-  {
-    "name": "bicycle",
-    "id": 1,
-    "color": "#6CC42C",
-    "type": "any",
-    "attributes": []
-  },
-  {
-    "name": "car",
-    "id": 2,
-    "color": "#FAFCD4",
-    "type": "any",
-    "attributes": []
-  }
-]
-```
 The contents of the json file must be inserted in "Raw" in the header of the project you created in CVAT:
 
-![Cvat example](documentation/example_cvat.jpg)
+![Cvat example](documentation/cvat_json.gif)
 
 [1]: https://docs.ultralytics.com/models/
 [2]: https://github.com/ultralytics/ultralytics/blob/main/ultralytics/cfg/datasets/coco.yaml
