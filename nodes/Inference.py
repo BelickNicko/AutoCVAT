@@ -6,16 +6,16 @@ import cv2
 
 class Inferencer:
     """
-    Класс для выполнения вывода с использованием модели YOLO и обработки результатов.
+    Class for performing inference using a YOLO model and processing the results.
 
     Args:
-        elements (DataGen): Набор данных для вывода.
-        model_path (str, optional): Путь к файлу модели YOLO. По умолчанию "yolov8m.pt".
-        imgsz (int, optional): Размер входных изображений. По умолчанию 640.
-        conf (float, optional): Порог уверенности. По умолчанию 0.7.
-        iou (float, optional): Порог пересечения по объединению (IOU). По умолчанию 0.8.
-        model (YOLO, optional): Предварительно инициализированная модель YOLO. По умолчанию None.
-        classes_list (list, optional): Список меток классов. По умолчанию None.
+        elements (DataGen): Dataset for inference.
+        model_path (str, optional): Path to the YOLO model file. Defaults to "yolov8m.pt".
+        imgsz (int, optional): Input image size. Defaults to 640.
+        conf (float, optional): Confidence threshold. Defaults to 0.7.
+        iou (float, optional): Intersection over Union (IoU) threshold. Defaults to 0.8.
+        model (YOLO, optional): Pre-initialized YOLO model. Defaults to None.
+        classes_list (list, optional): List of class labels. Defaults to None.
     """
 
     def __init__(
@@ -44,12 +44,13 @@ class Inferencer:
         self.classes = classes_list
         self.conf_dict = conf_dict
         self.minimize_points= minimize_points
+
     def process(self):
         """
-        Обрабатывает набор данных для вывода.
+        Processes the dataset for inference.
 
         Returns:
-            DataGen: Обработанный набор данных с результатами вывода.
+            DataGen: Processed dataset with inference results.
         """
         mask_id = 0
         printed = False
@@ -66,7 +67,7 @@ class Inferencer:
             )
 
             predictions = predictions[0]
-            # фильтрация по confidence
+            # Filter by confidence
             if len(self.conf_dict) != 0:
                 filtered_indices = [
                     i
@@ -78,26 +79,25 @@ class Inferencer:
                     )
                     if self.conf_dict[classs] <= conf
                 ]
-
             else:
                 filtered_indices = [i for i in range(len(predictions))]
-            # переводим объекты boxes в формат используемый в COCO
+            # Convert boxes to COCO format
             element.bbox = [
                 [box[0], box[1], box[2] - box[0], box[3] - box[1]]
                 for i, box in enumerate(predictions.boxes.xyxy.cpu().float().tolist())
                 if i in filtered_indices
             ]
-            # вычисляем id класса для каждого детекктируемого объекта на фотографии
+            # Calculate class IDs for each detected object in the image
             element.category_id = [
                 cls + 1
                 for i, cls in enumerate(predictions.boxes.cls.cpu().int().tolist())
                 if i in filtered_indices
             ]
-            # Для каждой детекции находим ее номер относительно всего набора фотографий
+            # Find annotation ID for each detection relative to the entire dataset
             element.annotations_id = [mask_id + i for i in range(len(filtered_indices))]
             if self.segment:
                 try:
-                    # список масок под формат COCO
+                    # List of masks in COCO format
                     if self.minimize_points:
                         element.detected_masks = self.minimize_contours(
                         predictions.masks.data.cpu().numpy(), filtered_indices, element.image
@@ -121,10 +121,10 @@ class Inferencer:
                         for i, mask in enumerate(predictions.masks.xy)
                         if i in filtered_indices
                     ]
-                    # ставим флаг на групповой объект
+                    # Set flag for group object
                     element.isscrowd = 0
                 except AttributeError:
-                    # если модель не сегментационная, то список масок пуст и мы вычисляем площади по bbox
+                    # If the model is not a segmentation model, the list of masks is empty and we calculate areas by bbox
                     element.detected_masks = []
                     element.areas = [box[2] * box[3] for box in element.bbox]
             else:
@@ -135,13 +135,13 @@ class Inferencer:
 
     def minimize_contours(self, predictions_masks_xy, filtered_indices, image):
         """
-        Преобразует маски в минимизированные контуры и сохраняет точки в требуемом формате.
+        Converts masks into minimized contours and saves points in the required format.
 
         Args:
-            predictions_masks_xy (list): Список сегментов в пиксельных координатах, представленных как тензоры.
-            filtered_indices (list): Индексы масок, которые нужно обработать.
+            predictions_masks_xy (list): List of segments in pixel coordinates represented as tensors.
+            filtered_indices (list): Indices of masks to process.
         Returns:
-            list: Список минимизированных контуров в формате списка точек.
+            list: List of minimized contours in the form of a list of points.
         """
         minimized_contours = []
         predictions_masks_xy = np.array(predictions_masks_xy)
@@ -153,18 +153,18 @@ class Inferencer:
                     (image.shape[1], image.shape[0]),
                     interpolation=cv2.INTER_NEAREST,
                 )
-                # Находим все контуры без иерархии
+                # Find all contours without hierarchy
                 mask_contours, _ = cv2.findContours(
                     mask_resized.astype(np.uint8), cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE
                 )
-                # Выбираем контур с наибольшей площадью
+                # Select the contour with the largest area
                 max_contour = max(mask_contours, key=cv2.contourArea)
-                # Упрощаем контур
-                epsilon = 0.002 * cv2.arcLength(max_contour, True)  # Задаем точность аппроксимации
+                # Simplify the contour
+                epsilon = 0.002 * cv2.arcLength(max_contour, True)  # Set the approximation accuracy
                 approx = cv2.approxPolyDP(
                     max_contour, epsilon, True
-                )  # Получаем аппроксимированный контур
-                # Преобразуем все значения координат в целые числа
+                )  # Get the approximated contour
+                # Convert all coordinate values to integers
                 mask_contour_int = list(map(int, approx.reshape(-1)))
                 minimized_contours.append(mask_contour_int)
         return minimized_contours
