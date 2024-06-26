@@ -109,7 +109,8 @@ def main(**kwargs):
     classes_cvat = list(configs["names"].values())
     classes_coco = list(configs["names"].keys())
     try:
-        dict_confs = configs["conf"]
+        dict_confs = configs["confs"]
+        print(classes_coco, list(dict_confs))
         if classes_coco != list(dict_confs):
             raise LengthMismatchError(
                 "Class list and confidence threshold dictionary keys list do not match. Each class must correspond to a confidence threshold."
