@@ -28,7 +28,7 @@ python AutoCvat.py --img_folder="images" --weights=yolov8m-seg.pt --yaml_pth=con
 ```
 An example of a more fine-tuning with all possible CLI parameters:
 ```
-python AutoCvat.py --img_folder=image_cars --weights=yolov8m-seg.pt --annotations_zip=cars_annotations --yaml_pth=configs.yaml --default_conf=0.2 --cvat_json=True --save_photo=True
+python AutoCvat.py --img_folder=images --weights=yolov8m-seg.pt --annotations_zip=cars_annotations --yaml_pth=configs.yaml --union_conf=0.2 --cvat_json=True --save_photo=True
 ```
 
 Table 1. Explanation of CLI command values:
@@ -39,8 +39,8 @@ Table 1. Explanation of CLI command values:
 | 2 | --weights=          | Path to the ultralytics model weights file (ex: yolov8m-seg.pt, yolov9c.pt, FastSAM-x.pt)       |  -           |
 | 3 | --yaml_pth=         | The path to configuration yaml file                                                             | configs.yaml |
 | 5 | --save_photo=       | Whether to create a file .zip photos to upload to CVAT                                          | False        |
-| 5 | --cvat_json=        | Should a json file with classes for CVAT be created                                             | False        |
-| 6 | --default_conf=     | The default value of the confidence of all model classes, condidences from config file don`t use | 0.5          |
+| 5 | --cvat_json=        | Should a json file with labels for CVAT be created                                              | False        |
+| 6 | --union_conf=     | The value of the confidence of all model classes, condidences from config file don`t use | 0.5          |
 
 For Russian users, there is a detailed video presentation of this project. YouTube video in Russian is available at this [link]().
 
@@ -69,9 +69,11 @@ segment: False
 The keys in the "names" are the numbering of the classes in your model, and the values are the names in the CVAT project (`predictions.boxes.cls.cpu().int().tolist()`)
 The keys in the "confs" are also the numbering of the classes, and the values are the confidence parameter of each class of the model.
 
-It is important to note that the number of confidentiality parameters must match the number of class names.
+**It is important to note that the number of confidentiality parameters must match the number of class names.**
 
-If the "segment" parameter is True, but your model only supports detection, a warning will be displayed in the terminal, and at the output you will receive the annotations from the detector.
+If the "segment" parameter is True, but your model only supports detection, the output you will receive the annotations from the detector.
+
+**If you solve the detection issue, you do not need to use "minimize_points" parameter. It only applies to the segmentation task**
 
 ## Сlasses combining 
 You can also combine several classes into one by giving them the same name in the configuration class, as in the example:
@@ -100,8 +102,8 @@ At the exit you will get:
 If you need to get the annotations of specific classes from YOLO, then you can see their numbers:
 [COCO classes supported by YOLO models][2] 
 
-#  Json file for creating classes in a cat project
-
+## How to create lables for your CVAT project
+If you will set cli command `--cvat_json=True`, you will get json file containing everything you need to create a project for your auto annotations.
 The contents of the json file must be inserted in "Raw" in the header of the project you created in CVAT:
 
 ![Cvat example](documentation/cvat_json.gif)
