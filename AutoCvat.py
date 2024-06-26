@@ -88,7 +88,7 @@ def generate_and_save_class_list(original_classes, file_name="new_classes.json")
     type=bool,
 )
 @click.option(
-    "--union_conf",
+    "--all_conf",
     default=None,
     help="The confidence parameter for all classes, confidences from config don't use",
     type=float,
@@ -100,7 +100,7 @@ def main(**kwargs):
     configs = kwargs['yaml_pth']
     save_photo = bool(kwargs['save_photo'])
     cvat_json = bool(kwargs['cvat_json'])
-    conf = kwargs['union_conf']
+    conf = kwargs['all_conf']
     
     # Load data from YAML file
     with open(configs, "r") as yaml_file:
@@ -109,14 +109,18 @@ def main(**kwargs):
     classes_cvat = list(configs["names"].values())
     classes_coco = list(configs["names"].keys())
     
-    try:
-        dict_confs = configs["confs"]
-        if classes_coco != list(dict_confs):
-            raise LengthMismatchError(
-                "Class list and confidence threshold dictionary keys list do not match. Each class must correspond to a confidence threshold."
-            )
-    except KeyError:
+    if conf is not None:
         dict_confs = {}
+    else:
+        conf = 0.5
+        try:
+            dict_confs = configs["confs"]
+            if classes_coco != list(dict_confs):
+                raise LengthMismatchError(
+                    "Class list and confidence threshold dictionary keys list do not match. Each class must correspond to a confidence threshold."
+                )
+        except KeyError:
+            dict_confs = {}
     
     # If the result folder already exists, delete it and create a new one
     if os.path.exists(result_folder):
@@ -155,11 +159,6 @@ def main(**kwargs):
     # Create a JSON string in COCO format
     datagen = DataGen(input_folder)
     elements = datagen.process()
-    
-    if conf is not None:
-        dict_confs = {}
-    else:
-        conf = 0.5
     try:
         minimize_points = configs["minimize_points"]
     except KeyError:

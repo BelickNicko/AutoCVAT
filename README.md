@@ -28,19 +28,19 @@ python AutoCvat.py --img_folder="images" --weights=yolov8m-seg.pt --yaml_pth=con
 ```
 An example of a more fine-tuning with all possible CLI parameters:
 ```
-python AutoCvat.py --img_folder=images --weights=yolov8m-seg.pt --annotations_zip=cars_annotations --yaml_pth=configs.yaml --union_conf=0.2 --cvat_json=True --save_photo=True
+python AutoCvat.py --img_folder=images --weights=yolov8m-seg.pt --annotations_zip=cars_annotations --yaml_pth=configs.yaml --all_conf=0.2 --cvat_json=True --save_photo=True
 ```
 
 Table 1. Explanation of CLI command values:
 
 | № | Command               | Description                                                                                   | Default value|
 |---|-----------------------|-----------------------------------------------------------------------------------------------|--------------|
-| 1 | --img_folder=       | Path to the folder containing images                                                            |  -           |
-| 2 | --weights=          | Path to the ultralytics model weights file (ex: yolov8m-seg.pt, yolov9c.pt, FastSAM-x.pt)       |  -           |
-| 3 | --yaml_pth=         | The path to configuration yaml file                                                             | configs.yaml |
-| 5 | --save_photo=       | Whether to create a file .zip photos to upload to CVAT                                          | False        |
-| 5 | --cvat_json=        | Should a json file with labels for CVAT be created                                              | False        |
-| 6 | --union_conf=     | The value of the confidence of all model classes, condidences from config file don`t use | 0.5          |
+| 1 | img_folder  | Path to the folder containing images                                                            |  -           |
+| 2 | weights     | Path to the ultralytics model weights file (ex: yolov8m-seg.pt, yolov9c.pt, FastSAM-x.pt)       |  -           |
+| 3 | yaml_pth       | The path to configuration yaml file                                                             | configs.yaml |
+| 5 | save_photo      | Whether to create a file .zip photos to upload to CVAT                                          | False        |
+| 5 | cvat_json     | Should a json file with labels for CVAT be created                                              | False        |
+| 6 | all_conf    | The value of the confidence of all model classes, condidences from config file don`t use | 0.5          |
 
 For Russian users, there is a detailed video presentation of this project. YouTube video in Russian is available at this [link]().
 
@@ -102,6 +102,31 @@ At the exit you will get:
 If you need to get the annotations of specific classes from YOLO, then you can see their numbers:
 [COCO classes supported by YOLO models][2] 
 
+## A good way to start model customization (YOLO-World)
+
+To speed up your pipeline cycle of annotation, training and model improvement. A good solution is to use the [YOLO-World model][3]. This model allows you to detect any object in the image based on descriptive texts.
+
+To get started you need to install the clip library:
+
+```pip install git+https://github.com/openai/CLIP.git```
+
+After that, set the classes that you want to detect and save your custom model:
+```
+from ultralytics import YOLO
+
+# Initialize a YOLO-World model
+model = YOLO("yolov8s-world.pt")  # or select yolov8m/l-world.pt
+
+# Define custom classes
+model.set_classes(["fork", "spoon"])
+
+# Save the model with the defined offline vocabulary
+model.save("custom_yolov8s.pt")
+```
+Then you can use AutoCvat to get the annotations using custom weights:
+
+![Cvat YOLO-World example](documentation/yolo_world_example.jpg)
+
 ## How to create lables for your CVAT project
 If you will set cli command `--cvat_json=True`, you will get json file containing everything you need to create a project for your auto annotations.
 The contents of the json file must be inserted in "Raw" in the header of the project you created in CVAT:
@@ -110,3 +135,4 @@ The contents of the json file must be inserted in "Raw" in the header of the pro
 
 [1]: https://docs.ultralytics.com/models/
 [2]: https://github.com/ultralytics/ultralytics/blob/main/ultralytics/cfg/datasets/coco.yaml
+[3]: https://docs.ultralytics.com/models/yolo-world/
