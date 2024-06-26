@@ -131,7 +131,7 @@ Then you can use AutoCvat to get the annotations using custom weights:
 If you will set cli command `--cvat_json=True`, you will get json file containing everything you need to create a project for your auto annotations.
 The contents of the json file must be inserted in "Raw" in the header of the project you created in CVAT:
 
-![Cvat example](documentation/cvat_json.gif){ width=300px }
+![Cvat example](documentation/cvat_json.gif)
 
 [1]: https://docs.ultralytics.com/models/
 [2]: https://github.com/ultralytics/ultralytics/blob/main/ultralytics/cfg/datasets/coco.yaml
