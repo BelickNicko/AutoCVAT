@@ -40,7 +40,7 @@ Table 1. Explanation of CLI command values:
 | 3 | yaml_pth       | The path to configuration yaml file                                                             | configs.yaml |
 | 5 | save_photo      | Whether to create a file .zip photos to upload to CVAT                                          | False        |
 | 5 | cvat_json     | Should a json file with labels for CVAT be created                                              | False        |
-| 6 | all_conf    | The value of the confidence of all model classes, condidences from config file don`t use | 0.5          |
+| 6 | all_conf    | The value of the confidence of all model classes, condidences from config file don`t use | None          |
 
 For Russian users, there is a detailed video presentation of this project. YouTube video in Russian is available at this [link]().
 
@@ -111,17 +111,17 @@ To get started you need to install the clip library:
 ```pip install git+https://github.com/openai/CLIP.git```
 
 After that, set the classes that you want to detect and save your custom model:
-```
+```python
 from ultralytics import YOLO
 
 # Initialize a YOLO-World model
-model = YOLO("yolov8s-world.pt")  # or select yolov8m/l-world.pt
+model = YOLO("yolov8x-world.pt")  # or select yolov8m/s-world.pt
 
 # Define custom classes
 model.set_classes(["dinosaur", "piano"])
 
 # Save the model with the defined offline vocabulary
-model.save("custom_yolov8s.pt")
+model.save("custom_yolo-world.pt")
 ```
 Then you can use AutoCvat to get the annotations using custom weights:
 
