@@ -112,7 +112,7 @@ def main(**kwargs):
     if conf is not None:
         dict_confs = {}
     else:
-        conf = 0.5
+        conf = 0.01  # default conf
         try:
             dict_confs = configs["confs"]
             if classes_coco != list(dict_confs):
