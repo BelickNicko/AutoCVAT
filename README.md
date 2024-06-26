@@ -125,7 +125,9 @@ model.save("custom_yolov8s.pt")
 ```
 Then you can use AutoCvat to get the annotations using custom weights:
 
-![Cvat YOLO-World example](documentation/yolo_world_example.jpg)
+<div style="text-align: center;">
+    <img src="documentation/yolo_world_example.jpg" alt="Cvat YOLO-World example" width="500" height="600"/>
+</div>
 
 ## How to create lables for your CVAT project
 If you will set cli command `--cvat_json=True`, you will get json file containing everything you need to create a project for your auto annotations.
