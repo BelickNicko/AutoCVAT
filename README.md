@@ -42,7 +42,7 @@ Table 1. Explanation of CLI command values:
 | 5 | cvat_json     | Should a json file with labels for CVAT be created                                              | False        |
 | 6 | all_conf    | The value of the confidence of all model classes, condidences from config file don`t use | None          |
 
-For Russian users, there is a detailed video presentation of this project. YouTube video in Russian is available at this [link]().
+For Russian users, there is a detailed video presentation of this project. YouTube video in Russian is available at this [link](https://www.youtube.com/watch?v=pyRvMj6JY_8).
 
 ## Configuration file
 
@@ -91,7 +91,6 @@ confs:
   2: 0.4
   3: 0.5
   14: 0.3
-
 iou: 0.7
 minimize_points: True
 segment: True
@@ -133,7 +132,6 @@ The contents of the json file must be inserted in "Raw" in the header of the pro
 
 ![Cvat example](documentation/cvat_json.gif)
 
-### **Special thanks to [Dmitry Kolesnikov][4]**
 
 [1]: https://docs.ultralytics.com/models/
 [2]: https://github.com/ultralytics/ultralytics/blob/main/ultralytics/cfg/datasets/coco.yaml
