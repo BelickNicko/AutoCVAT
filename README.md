@@ -101,9 +101,9 @@ At the exit you will get:
 If you need to get the annotations of specific classes from YOLO, then you can see their numbers:
 [COCO classes supported by YOLO models][2] 
 
-## A good way to start model customization (YOLO-World)
+## Utilize Zero-Shot object detectors for automatic annotation (YOLO-World)
 
-To speed up your pipeline cycle of annotation, training and model improvement. A good solution is to use the [YOLO-World model][3]. This model allows you to detect any object in the image based on descriptive texts.
+To speed up your pipeline cycle of annotation, training and model improvement a good solution is to use the [YOLO-World model][3]. This model allows you to detect any object in the image based on descriptive texts.
 
 To get started you need to install the clip library:
 
