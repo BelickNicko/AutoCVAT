@@ -96,7 +96,7 @@ def generate_and_save_class_list(original_classes, file_name="new_classes.json")
 @click.option(
     "--zero_shot_segmentation",
     default=False,
-    help="When set to True, it allows for zero-shot instance segmentation using SAM from any source detection network.",
+    help="When set to True, it allows for zero-shot instance segmentation using SAM from any source detection network",
     type=bool,
 )
 def main(**kwargs):
@@ -124,7 +124,8 @@ def main(**kwargs):
             dict_confs = configs["confs"]
             if classes_coco != list(dict_confs):
                 raise LengthMismatchError(
-                    "Class list and confidence threshold dictionary keys list do not match. Each class must correspond to a confidence threshold."
+                    "Class list and confidence threshold dictionary keys list do not match. " 
+                    "Each class must correspond to a confidence threshold."
                 )
         except KeyError:
             dict_confs = {}
@@ -166,21 +167,18 @@ def main(**kwargs):
     # Create a JSON string in COCO format
     datagen = DataGen(input_folder)
     elements = datagen.process()
-    try:
-        minimize_points = configs["minimize_points"]
-    except KeyError:
-        minimize_points = False
     
     # Inference each photo
     inferencer = Inferencer(
         elements,
-        segment=configs['segment'],
+        segment=configs.get("segment", False),
         model_path=model_pth,
         classes_list=classes_coco,
         conf_dict=dict_confs,
         conf=conf,
-        iou=configs["iou"],
-        minimize_points=minimize_points,
+        imgsz=configs.get("imgsz", 640),
+        iou=configs.get("iou", 0.8),
+        minimize_points=configs.get("minimize_points", False),
         use_box_propt_sam=use_box_propt_sam,
     )
     elements = inferencer.process()
