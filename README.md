@@ -91,7 +91,7 @@ The keys in the "confs" are also the numbering of the classes, and the values ar
 
 **It is important to note that the number of confidentiality parameters must match the number of class names.**
 
-If the "segment" parameter is True, but your model only supports detection, the output you will receive the annotations from the detector. Однако, можно включить режим --zero_shot_segmentation=True, что позволит модели дектору выдавть на выходе сегментационные маски благодаря подачи дектекционных боксов в качестве входных промптов на предобученную нейронную сеть SAM
+If the "segment" parameter is set to True, but your model only supports detection, the output you will receive will be annotations from the detector. However, you can enable the --zero_shot_segmentation=True mode, which will allow the detection model to produce segmentation masks by using the detected bounding boxes as input prompts for a pre-trained neural network called SAM (Segment Anything Model).
 
 **If you solve the detection issue, you do not need to use "minimize_points" parameter. It only applies to the segmentation task**
 
