@@ -29,6 +29,7 @@ class Inferencer:
         model=None,
         classes_list=None,
         minimize_points=True,
+        use_box_propt_sam=False,
         conf_dict={},
     ) -> None:
         self.segment = segment
@@ -45,10 +46,14 @@ class Inferencer:
         self.conf_dict = conf_dict
         self.minimize_points= minimize_points
 
-        self.use_box_propt_sam = True
-        if self.use_box_propt_sam:
+        self.use_box_propt_sam = use_box_propt_sam
+        if self.use_box_propt_sam and self.segment:
             from ultralytics.models.fastsam import FastSAMPrompt
             self.FastSAMPrompt = FastSAMPrompt
+            print(
+                "Instance segmentation will be performed using a zero-shot approach "
+                "thanks to feeding detected boxes through a pre-trained SAM network."
+            )
             self.model_sam = YOLO("FastSAM-x.pt")
 
     def process(self):

@@ -93,6 +93,12 @@ def generate_and_save_class_list(original_classes, file_name="new_classes.json")
     help="The confidence parameter for all classes, confidences from config don't use",
     type=float,
 )
+@click.option(
+    "--zero_shot_segmentation",
+    default=False,
+    help="When set to True, it allows for zero-shot instance segmentation using SAM from any source detection network.",
+    type=bool,
+)
 def main(**kwargs):
     result_folder = kwargs["annotations_zip"]
     model_pth = kwargs["weights"]
@@ -101,6 +107,7 @@ def main(**kwargs):
     save_photo = bool(kwargs['save_photo'])
     cvat_json = bool(kwargs['cvat_json'])
     conf = kwargs['all_conf']
+    use_box_propt_sam = kwargs['zero_shot_segmentation']
     
     # Load data from YAML file
     with open(configs, "r") as yaml_file:
@@ -174,6 +181,7 @@ def main(**kwargs):
         conf=conf,
         iou=configs["iou"],
         minimize_points=minimize_points,
+        use_box_propt_sam=use_box_propt_sam,
     )
     elements = inferencer.process()
     

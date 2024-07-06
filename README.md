@@ -28,7 +28,7 @@ python AutoCvat.py --img_folder="images" --weights=yolov8m-seg.pt --yaml_pth=con
 ```
 An example of a more fine-tuning with all possible CLI parameters:
 ```
-python AutoCvat.py --img_folder=images --weights=yolov8m-seg.pt --annotations_zip=cars_annotations --yaml_pth=configs.yaml --all_conf=0.2 --cvat_json=True --save_photo=True
+python AutoCvat.py --img_folder=images --weights=yolov8m-seg.pt --annotations_zip=cars_annotations --yaml_pth=configs.yaml --all_conf=0.2 --cvat_json=True --save_photo=True --zero_shot_segmentation=False
 ```
 
 Table 1. Explanation of CLI command values:
@@ -41,14 +41,33 @@ Table 1. Explanation of CLI command values:
 | 5 | save_photo      | Whether to create a file .zip photos to upload to CVAT                                          | False        |
 | 5 | cvat_json     | Should a json file with labels for CVAT be created                                              | False        |
 | 6 | all_conf    | The value of the confidence of all model classes, condidences from config file don`t use | None          |
+| 7 | zero_shot_segmentation    | When set to True, it allows for zero-shot instance segmentation using SAM from any source detection network | False          |
 
 For Russian users, there is a detailed video presentation of this project. YouTube video in Russian is available at this [link](https://www.youtube.com/watch?v=pyRvMj6JY_8).
 
 ## Configuration file
 
-The project also provides a configuration file where the parameters each class in your custom or pretrained YOLO model, confidentiality for each class, the iou parameter are set, parameter "minimize_points", that includes the ability to minimize the number of points in the polygons of the final markup (True is advised) and "segment" parameter, which sets the issue you want to solve True - instance segmentation, False - detection
+The project includes a configuration file that allows you to customize various parameters for your YOLO model, whether it's a custom or pretrained version. Here's a clearer breakdown of the settings available in this configuration file:
 
-An example of configuring a configuration file to configure defined classes and make the model confident in their presence:
+- CVAT Class Names Mapping (names): This parameter maps the class numbers from your model to the class names in your CVAT project, ensuring that the annotations are correctly labeled.
+
+- Confidence Scores (confs): This parameter sets the confidence thresholds for each class in the model. Higher thresholds result in fewer potential objects being detected for each class, enhancing precision.
+
+- Intersection over Union (iou): This parameter is used for Non-Maximum Suppression (NMS), helping to decide which bounding boxes to keep by setting a threshold for overlap between boxes.
+
+- Image Size (imgsz): This parameter determines the size to which input images are resized during model inference, affecting the resolution and processing speed.
+
+- Minimize Points (minimize_points): When set to True, this parameter reduces the number of points in the polygons of the final markup, which is recommended for efficiency and simplicity.
+
+- Segment Parameter (segment): This parameter specifies the type of task you want to perform:
+  - True: For instance segmentation, where the model identifies and outlines each instance of a class. Creates polygonal markup in CVAT.
+
+   - False: For object detection, where the model identifies the presence of objects without delineating their exact boundaries.Creates bounding box markup in CVAT.
+
+This configuration file provides a flexible way to tailor the model's behavior to your specific needs, ensuring that the model's output aligns with your project requirements.
+
+Below is an example of a YAML configuration file:
+
 ```
 names:
   0: person
@@ -63,6 +82,7 @@ confs:
   3: 0.5
   14: 0.6
 iou: 0.7
+imgsz: 640
 minimize_points: False
 segment: False
 ```
@@ -71,7 +91,7 @@ The keys in the "confs" are also the numbering of the classes, and the values ar
 
 **It is important to note that the number of confidentiality parameters must match the number of class names.**
 
-If the "segment" parameter is True, but your model only supports detection, the output you will receive the annotations from the detector.
+If the "segment" parameter is True, but your model only supports detection, the output you will receive the annotations from the detector. Однако, можно включить режим --zero_shot_segmentation=True, что позволит модели дектору выдавть на выходе сегментационные маски благодаря подачи дектекционных боксов в качестве входных промптов на предобученную нейронную сеть SAM
 
 **If you solve the detection issue, you do not need to use "minimize_points" parameter. It only applies to the segmentation task**
 
@@ -92,6 +112,7 @@ confs:
   3: 0.5
   14: 0.3
 iou: 0.7
+imgsz: 640
 minimize_points: True
 segment: True
 ```
@@ -101,7 +122,7 @@ At the exit you will get:
 If you need to get the annotations of specific classes from YOLO, then you can see their numbers:
 [COCO classes supported by YOLO models][2] 
 
-## Utilize Zero-Shot object detectors for automatic annotation (YOLO-World)
+## Utilize Zero-shot object detectors for automatic annotation (YOLO-World)
 
 To speed up your pipeline cycle of annotation, training and model improvement a good solution is to use the [YOLO-World model][3]. This model allows you to detect any object in the image based on descriptive texts.
 
@@ -125,6 +146,10 @@ model.save("custom_yolo-world.pt")
 Then you can use AutoCvat to get the annotations using custom weights:
 
 ![Cvat YOLO-World example](documentation/yolo_world_example.jpg)
+
+## How to do Zero-shot instance segmentation
+
+...
 
 ## How to create lables for your CVAT project
 If you will set cli command `--cvat_json=True`, you will get json file containing everything you need to create a project for your auto annotations.
