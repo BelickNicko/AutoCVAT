@@ -91,7 +91,7 @@ The keys in the "confs" are also the numbering of the classes, and the values ar
 
 **It is important to note that the number of confidentiality parameters must match the number of class names.**
 
-If the "segment" parameter is set to True, but your model only supports detection, the output you will receive will be annotations from the detector. However, you can enable the --zero_shot_segmentation=True mode, which will allow the detection model to produce segmentation masks by using the detected bounding boxes as input prompts for a pre-trained neural network called SAM (Segment Anything Model).
+If the "segment" parameter is set to True, but your model only supports detection, the output you will receive will be annotations from the detector. However, you can enable the --zero_shot_segmentation=True mode, which will allow the detection model to produce segmentation masks by using the detected bounding boxes as input prompts for a pre-trained neural network called SAM. The detailed explanation of this approach is provided in the "How to do Zero-shot instance segmentation for automatic annotation" section of the README.
 
 **If you solve the detection issue, you do not need to use "minimize_points" parameter. It only applies to the segmentation task**
 
@@ -147,9 +147,18 @@ Then you can use AutoCvat to get the annotations using custom weights:
 
 ![Cvat YOLO-World example](documentation/yolo_world_example.jpg)
 
-## How to do Zero-shot instance segmentation
+## How to do Zero-shot instance segmentation for automatic annotation
+It is possible to transform any initial detection neural network into an instance segmentation network. The output detection boxes are fed as input prompts into the SAM (Segment Anything Model), which allows for the generation of hypothetical polygon contours of objects. As an example, this approach can be used in conjunction with the Zero-shot detector YOLO-World, enabling Zero-shot instance segmentation (similar to the Grounded SAM approach).
 
-...
+To activate this mode, you need to add `--zero_shot_segmentation=True` to the terminal command and specify `segment: True` in the YAML configuration file.
+
+Example of using the instance segmenter network obtained from YOLO-world:
+
+```
+python AutoCvat.py --img_folder="images" --weights=custom_yolo-world.pt --yaml_pth=configs.yaml --zero_shot_segmentation=True
+```
+
+![Cvat YOLO-World example](documentation/yolo_world_example_seg.jpg)
 
 ## How to create lables for your CVAT project
 If you will set cli command `--cvat_json=True`, you will get json file containing everything you need to create a project for your auto annotations.
