@@ -27,7 +27,7 @@ class COCOConverter:
         for name, id_ in zip(category_names, category_id):
             category_dict[name].append(id_)
         self.category_dict = dict(category_dict)
-    
+
     def convert_to_coco(self):
         """Converts the data to COCO format.
 
@@ -59,13 +59,21 @@ class COCOConverter:
         annotations = []
         annotation_id = 1
         for elem in self.elements:
-            
+
             counter = 0
             for bbox, area, category_id in zip(elem.bbox, elem.areas, elem.category_id):
                 annotation = {
                     "id": annotation_id,
                     "image_id": elem.image_id,
-                    "category_id": int(list(filter(lambda sublist: category_id-1 in sublist, self.category_dict.values()))[0][0] + 1),
+                    "category_id": int(
+                        list(
+                            filter(
+                                lambda sublist: category_id - 1 in sublist,
+                                self.category_dict.values(),
+                            )
+                        )[0][0]
+                        + 1
+                    ),
                     "segmentation": [],
                     "bbox": bbox,
                     "area": area,

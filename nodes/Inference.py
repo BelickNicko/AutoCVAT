@@ -44,11 +44,12 @@ class Inferencer:
         self.elements = elements
         self.classes = classes_list
         self.conf_dict = conf_dict
-        self.minimize_points= minimize_points
+        self.minimize_points = minimize_points
 
         self.use_box_propt_sam = use_box_propt_sam
         if self.use_box_propt_sam and self.segment:
             from ultralytics.models.fastsam import FastSAMPrompt
+
             self.FastSAMPrompt = FastSAMPrompt
             print(
                 "Instance segmentation will be performed using a zero-shot approach "
@@ -146,16 +147,17 @@ class Inferencer:
 
                     element.detected_masks = [
                         [
-                            float(detected_masks[i][j]) if j % 2 == 1 else float(detected_masks[i][j])
+                            (
+                                float(detected_masks[i][j])
+                                if j % 2 == 1
+                                else float(detected_masks[i][j])
+                            )
                             for j in range(len(detected_masks[i]))
                         ]
                         for i in range(len(detected_masks))
                     ]
 
-                    element.areas = [
-                        0
-                        for i, _ in enumerate(element.detected_masks)
-                    ]
+                    element.areas = [0 for i, _ in enumerate(element.detected_masks)]
                     # Set flag for group object
                     element.isscrowd = 0
                 else:
@@ -163,7 +165,9 @@ class Inferencer:
                         # List of masks in COCO format
                         if self.minimize_points:
                             element.detected_masks = self.minimize_contours(
-                                predictions.masks.data.cpu().numpy(), filtered_indices, element.image
+                                predictions.masks.data.cpu().numpy(),
+                                filtered_indices,
+                                element.image,
                             )
                         else:
                             detected_masks = [
@@ -173,7 +177,11 @@ class Inferencer:
                             ]
                             element.detected_masks = [
                                 [
-                                    float(detected_masks[i][j]) if j % 2 == 1 else float(detected_masks[i][j])
+                                    (
+                                        float(detected_masks[i][j])
+                                        if j % 2 == 1
+                                        else float(detected_masks[i][j])
+                                    )
                                     for j in range(len(detected_masks[i]))
                                 ]
                                 for i in range(len(detected_masks))
