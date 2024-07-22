@@ -11,5 +11,6 @@ confs:
   3: 0.5
   14: 0.6
 iou: 0.7
+imgsz: 640
 minimize_points: True
 segment: True

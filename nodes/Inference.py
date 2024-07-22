@@ -29,6 +29,7 @@ class Inferencer:
         model=None,
         classes_list=None,
         minimize_points=True,
+        use_box_propt_sam=False,
         conf_dict={},
     ) -> None:
         self.segment = segment
@@ -43,7 +44,18 @@ class Inferencer:
         self.elements = elements
         self.classes = classes_list
         self.conf_dict = conf_dict
-        self.minimize_points= minimize_points
+        self.minimize_points = minimize_points
+
+        self.use_box_propt_sam = use_box_propt_sam
+        if self.use_box_propt_sam and self.segment:
+            from ultralytics.models.fastsam import FastSAMPrompt
+
+            self.FastSAMPrompt = FastSAMPrompt
+            print(
+                "Instance segmentation will be performed using a zero-shot approach "
+                "thanks to feeding detected boxes through a pre-trained SAM network."
+            )
+            self.model_sam = YOLO("FastSAM-x.pt")
 
     def process(self):
         """
@@ -53,7 +65,6 @@ class Inferencer:
             DataGen: Processed dataset with inference results.
         """
         mask_id = 0
-        printed = False
 
         for element in self.elements:
             predictions = self.model.predict(
@@ -96,37 +107,97 @@ class Inferencer:
             # Find annotation ID for each detection relative to the entire dataset
             element.annotations_id = [mask_id + i for i in range(len(filtered_indices))]
             if self.segment:
-                try:
-                    # List of masks in COCO format
-                    if self.minimize_points:
-                        element.detected_masks = self.minimize_contours(
-                        predictions.masks.data.cpu().numpy(), filtered_indices, element.image
-                    )
-                    else:
-                        detected_masks = [
-                        mask.flatten()
-                        for i, mask in enumerate(predictions.masks.xy)
-                        if i in filtered_indices
-                    ]
-                        element.detected_masks = [
-                            [
-                                float(detected_masks[i][j]) if j % 2 == 1 else float(detected_masks[i][j])
-                                for j in range(len(detected_masks[i]))
-                            ]
-                            for i in range(len(detected_masks))
-                        ]
+                if self.use_box_propt_sam:
+                    # process boxes as input pompt for sam
 
-                    element.areas = [
-                        Polygon(mask).area
-                        for i, mask in enumerate(predictions.masks.xy)
-                        if i in filtered_indices
+                    detected_masks = []
+
+                    for box in element.bbox:
+                        everything_results = self.model_sam(
+                            element.image,
+                            retina_masks=True,
+                            imgsz=1024,
+                            conf=0.1,
+                            iou=0.9,
+                            verbose=False,
+                        )
+
+                        # Prepare a Prompt Process object
+                        prompt_process = self.FastSAMPrompt(element.image, everything_results)
+
+                        # Bounding box prompt
+                        ann = prompt_process.box_prompt(
+                            bbox=[
+                                int(box[0]),
+                                int(box[1]),
+                                int(box[2] + box[0]),
+                                int(box[3] + box[1]),
+                            ]
+                        )[0]
+
+                        # List of masks in COCO format
+                        if self.minimize_points:
+                            detected_mask = self.minimize_contours(
+                                ann.masks.data.cpu().numpy(), [0], element.image
+                            )[0]
+                        else:
+                            detected_mask = ann.masks.xy[0].flatten()
+
+                        detected_masks.append(detected_mask)
+
+                    element.detected_masks = [
+                        [
+                            (
+                                float(detected_masks[i][j])
+                                if j % 2 == 1
+                                else float(detected_masks[i][j])
+                            )
+                            for j in range(len(detected_masks[i]))
+                        ]
+                        for i in range(len(detected_masks))
                     ]
+
+                    element.areas = [0 for i, _ in enumerate(element.detected_masks)]
                     # Set flag for group object
                     element.isscrowd = 0
-                except AttributeError:
-                    # If the model is not a segmentation model, the list of masks is empty and we calculate areas by bbox
-                    element.detected_masks = []
-                    element.areas = [box[2] * box[3] for box in element.bbox]
+                else:
+                    try:
+                        # List of masks in COCO format
+                        if self.minimize_points:
+                            element.detected_masks = self.minimize_contours(
+                                predictions.masks.data.cpu().numpy(),
+                                filtered_indices,
+                                element.image,
+                            )
+                        else:
+                            detected_masks = [
+                                mask.flatten()
+                                for i, mask in enumerate(predictions.masks.xy)
+                                if i in filtered_indices
+                            ]
+                            element.detected_masks = [
+                                [
+                                    (
+                                        float(detected_masks[i][j])
+                                        if j % 2 == 1
+                                        else float(detected_masks[i][j])
+                                    )
+                                    for j in range(len(detected_masks[i]))
+                                ]
+                                for i in range(len(detected_masks))
+                            ]
+
+                        element.areas = [
+                            Polygon(mask).area
+                            for i, mask in enumerate(predictions.masks.xy)
+                            if i in filtered_indices
+                        ]
+                        # Set flag for group object
+                        element.isscrowd = 0
+                    except AttributeError:
+                        # If the model is not a segmentation model, the list of masks is empty and we calculate areas by bbox
+                        element.detected_masks = []
+                        element.areas = [box[2] * box[3] for box in element.bbox]
             else:
                 element.detected_masks = []
                 element.areas = [box[2] * box[3] for box in element.bbox]

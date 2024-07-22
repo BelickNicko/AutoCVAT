@@ -1,5 +1,6 @@
 import numpy as np
 
+
 class Element:
     # Class containing information about a specific crop
     def __init__(

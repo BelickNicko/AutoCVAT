@@ -1,4 +1,4 @@
-# Libraries for working with files and directories
+import random
 import os
 import shutil
 import yaml
@@ -11,9 +11,6 @@ import click
 from nodes.Datagen import DataGen
 from nodes.Inference import Inferencer
 from nodes.AnnotMaker import COCOConverter
-
-# auxiliary libraries
-import random
 
 
 class LengthMismatchError(Exception):
@@ -93,22 +90,29 @@ def generate_and_save_class_list(original_classes, file_name="new_classes.json")
     help="The confidence parameter for all classes, confidences from config don't use",
     type=float,
 )
+@click.option(
+    "--zero_shot_segmentation",
+    default=False,
+    help="When set to True, it allows for zero-shot instance segmentation using SAM from any source detection network",
+    type=bool,
+)
 def main(**kwargs):
     result_folder = kwargs["annotations_zip"]
     model_pth = kwargs["weights"]
     input_folder = kwargs["img_folder"]
-    configs = kwargs['yaml_pth']
-    save_photo = bool(kwargs['save_photo'])
-    cvat_json = bool(kwargs['cvat_json'])
-    conf = kwargs['all_conf']
-    
+    configs = kwargs["yaml_pth"]
+    save_photo = bool(kwargs["save_photo"])
+    cvat_json = bool(kwargs["cvat_json"])
+    conf = kwargs["all_conf"]
+    use_box_propt_sam = kwargs["zero_shot_segmentation"]
+
     # Load data from YAML file
     with open(configs, "r") as yaml_file:
         configs = yaml.safe_load(yaml_file)
     # Get all keys and all values
     classes_cvat = list(configs["names"].values())
     classes_coco = list(configs["names"].keys())
-    
+
     if conf is not None:
         dict_confs = {}
     else:
@@ -117,15 +121,16 @@ def main(**kwargs):
             dict_confs = configs["confs"]
             if classes_coco != list(dict_confs):
                 raise LengthMismatchError(
-                    "Class list and confidence threshold dictionary keys list do not match. Each class must correspond to a confidence threshold."
+                    "Class list and confidence threshold dictionary keys list do not match. "
+                    "Each class must correspond to a confidence threshold."
                 )
         except KeyError:
             dict_confs = {}
-    
+
     # If the result folder already exists, delete it and create a new one
     if os.path.exists(result_folder):
         shutil.rmtree(result_folder)
-    
+
     # If the image upload folder exists, delete it and create a new one
     if os.path.exists("images_for_cvat"):
         shutil.rmtree("images_for_cvat")
@@ -134,7 +139,7 @@ def main(**kwargs):
     os.mkdir(result_folder)
     os.mkdir(result_folder + "/annotations")
     os.mkdir(result_folder + "/images")
-    
+
     if save_photo:
         os.mkdir("images_for_cvat")
     # Get the list of files in the source folder
@@ -143,40 +148,36 @@ def main(**kwargs):
     for file_name in files:
         source_file = os.path.join(input_folder, file_name)
         destination_file = os.path.join(result_folder + "/images", file_name)
-        shutil.copy2(
-            source_file, destination_file
-        )  # Use shutil.copy2 to copy with metadata
+        shutil.copy2(source_file, destination_file)  # Use shutil.copy2 to copy with metadata
         if save_photo:
             shutil.copy2(source_file, os.path.join("images_for_cvat", file_name))
-    
+
     if save_photo:
         # Create a zip archive for uploading to CVAT
         shutil.make_archive("images_for_cvat", "zip", "images_for_cvat")
         # Delete the image folder for uploading to CVAT
         shutil.rmtree("images_for_cvat")
         print("Zip archive for uploading to CVAT: images_for_cvat.zip")
-    
+
     # Create a JSON string in COCO format
     datagen = DataGen(input_folder)
     elements = datagen.process()
-    try:
-        minimize_points = configs["minimize_points"]
-    except KeyError:
-        minimize_points = False
-    
+
     # Inference each photo
     inferencer = Inferencer(
         elements,
-        segment=configs['segment'],
+        segment=configs.get("segment", False),
         model_path=model_pth,
         classes_list=classes_coco,
         conf_dict=dict_confs,
         conf=conf,
-        iou=configs["iou"],
-        minimize_points=minimize_points,
+        imgsz=configs.get("imgsz", 640),
+        iou=configs.get("iou", 0.8),
+        minimize_points=configs.get("minimize_points", False),
+        use_box_propt_sam=use_box_propt_sam,
     )
     elements = inferencer.process()
-    
+
     # Create a JSON object
     converter = COCOConverter(elements, classes_cvat, classes_coco)
     results = converter.convert_to_coco()
@@ -199,6 +200,7 @@ def main(**kwargs):
     # Create a json for the CVAT project
     if cvat_json:
         generate_and_save_class_list(classes_cvat)
+
 
 if __name__ == "__main__":
     main()
