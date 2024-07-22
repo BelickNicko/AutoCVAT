@@ -19,7 +19,7 @@ Install all necessary libraries:
 
 ```pip install -r requirements.txt```
 
-__This repository supports all relevant models from Ultralytics:__ YOLOv8/v9/v10 (and lower) for detection and segmentation, FastSAM, and YOLO-World (Real-Time Open-Vocabulary Object Detection).
+__This repository supports all relevant models from Ultralytics:__ YOLOv8/v9/v10 (and lower) for detection and segmentation, RT-DETR, FastSAM, and YOLO-World (Real-Time Open-Vocabulary Object Detection).
 
 ## How to run the code:
 To interact with the repository, you need to set the following command in the cmd terminal:
@@ -35,13 +35,14 @@ Table 1. Explanation of CLI command values:
 
 | № | Command               | Description                                                                                   | Default value|
 |---|-----------------------|-----------------------------------------------------------------------------------------------|--------------|
-| 1 | img_folder  | Path to the folder containing images                                                            |  -           |
+| 1 | img_folder  | Path to the folder containing images of CVAT task                                               |  -           |
 | 2 | weights     | Path to the ultralytics model weights file (ex: yolov8m-seg.pt, yolov9c.pt, FastSAM-x.pt)       |  -           |
-| 3 | yaml_pth       | The path to configuration yaml file                                                             | configs.yaml |
-| 5 | save_photo      | Whether to create a file .zip photos to upload to CVAT                                          | False        |
-| 5 | cvat_json     | Should a json file with labels for CVAT be created                                              | False        |
-| 6 | all_conf    | The value of the confidence of all model classes, condidences from config file don`t use | None          |
-| 7 | zero_shot_segmentation    | When set to True, it allows for zero-shot instance segmentation using SAM from any source detection network | False          |
+| 3 | yaml_pth       | The path to configuration yaml file                                                          | configs.yaml |
+| 4 | annotations_zip       | Name of the COCO CVAT annotation zip archive produced by the program                  | annotations  |
+| 5 | save_photo      | Whether to create a file .zip photos to upload to CVAT                                      | False        |
+| 6 | cvat_json     | Should a json file with labels for CVAT be created                                            | False        |
+| 7 | all_conf    | The value of the confidence of all model classes, condidences from config file don`t use        | None         |
+| 8 | zero_shot_segmentation    | When set to True, it allows for zero-shot instance segmentation using SAM from any source detection network  | False |
 
 For Russian users, there is a detailed video presentation of this project. YouTube video in Russian is available at this [link](https://www.youtube.com/watch?v=pyRvMj6JY_8).
 
