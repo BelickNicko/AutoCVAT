@@ -1,6 +1,5 @@
 import numpy as np
 from ultralytics import YOLO
-from shapely.geometry import Polygon
 import cv2
 
 
@@ -188,8 +187,7 @@ class Inferencer:
                             ]
 
                         element.areas = [
-                            Polygon(mask).area
-                            for i, mask in enumerate(predictions.masks.xy)
+                            0 for i, mask in enumerate(predictions.masks.xy)
                             if i in filtered_indices
                         ]
                         # Set flag for group object

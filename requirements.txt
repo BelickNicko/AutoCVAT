@@ -1,5 +1,4 @@
 ultralytics
 click
 opencv-python
-shapely
 PyYAML
