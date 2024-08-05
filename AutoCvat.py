@@ -116,16 +116,14 @@ def main(**kwargs):
     if conf is not None:
         dict_confs = {}
     else:
-        conf = 0.01  # default conf
-        try:
-            dict_confs = configs["confs"]
-            if classes_coco != list(dict_confs):
-                raise LengthMismatchError(
-                    "Class list and confidence threshold dictionary keys list do not match. "
-                    "Each class must correspond to a confidence threshold."
-                )
-        except KeyError:
-            dict_confs = {}
+        dict_confs = configs.get("confs", {})
+        if classes_coco != list(dict_confs):
+            raise LengthMismatchError(
+                "Class list and confidence threshold dictionary keys list do not match. "
+                "Each class must correspond to a confidence threshold."
+            )
+        min_value_conf = min((float(value) for value in dict_confs.values()))
+        conf = min_value_conf  # default conf as min conf of classes
 
     # If the result folder already exists, delete it and create a new one
     if os.path.exists(result_folder):

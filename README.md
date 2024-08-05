@@ -102,15 +102,15 @@ You can also combine several classes into one by giving them the same name in th
 ```
 names:
   0: person
-  1: car
   2: car
-  3: car
+  5: car
+  7: car
   14: bird
 confs:
   0: 0.7
-  1: 0.4
   2: 0.4
-  3: 0.5
+  5: 0.4
+  7: 0.5
   14: 0.3
 iou: 0.7
 imgsz: 640
