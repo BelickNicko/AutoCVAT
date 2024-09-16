@@ -68,7 +68,7 @@ def generate_and_save_class_list(original_classes, file_name="new_classes.json")
 )
 @click.option(
     "--yaml_pth",
-    default="configs.yaml",
+    default="config.yaml",
     help="The path to configuration yaml file",
     type=str,
 )
