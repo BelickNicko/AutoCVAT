@@ -24,11 +24,11 @@ __This repository supports all relevant models from Ultralytics:__ YOLOv8/v9/v10
 ## How to run the code:
 To interact with the repository, you need to set the following command in the cmd terminal:
 ```
-python AutoCvat.py --img_folder="images" --weights=yolov8m-seg.pt --yaml_pth=configs.yaml
+python AutoCvat.py --img_folder="images" --weights=yolov8m-seg.pt --yaml_pth=config.yaml
 ```
 An example of a more fine-tuning with all possible CLI parameters:
 ```
-python AutoCvat.py --img_folder=images --weights=yolov8m-seg.pt --annotations_zip=cars_annotations --yaml_pth=configs.yaml --all_conf=0.2 --cvat_json=True --save_photo=True --zero_shot_segmentation=False
+python AutoCvat.py --img_folder=images --weights=yolov8m-seg.pt --annotations_zip=cars_annotations --yaml_pth=config.yaml --all_conf=0.2 --cvat_json=True --save_photo=True --zero_shot_segmentation=False
 ```
 
 Table 1. Explanation of CLI command values:
@@ -37,7 +37,7 @@ Table 1. Explanation of CLI command values:
 |---|-----------------------|-----------------------------------------------------------------------------------------------|--------------|
 | 1 | img_folder  | Path to the folder containing images of CVAT task                                               |  -           |
 | 2 | weights     | Path to the ultralytics model weights file (ex: yolov8m-seg.pt, yolov9c.pt, FastSAM-x.pt)       |  -           |
-| 3 | yaml_pth       | The path to configuration yaml file                                                          | configs.yaml |
+| 3 | yaml_pth       | The path to configuration yaml file                                                          | config.yaml |
 | 4 | annotations_zip       | Name of the COCO CVAT annotation zip archive produced by the program                  | annotations  |
 | 5 | save_photo      | Whether to create a file .zip photos to upload to CVAT                                      | False        |
 | 6 | cvat_json     | Should a json file with labels for CVAT be created                                            | False        |
@@ -156,7 +156,7 @@ To activate this mode, you need to add `--zero_shot_segmentation=True` to the te
 Example of using the instance segmenter network obtained from YOLO-world:
 
 ```
-python AutoCvat.py --img_folder="images" --weights=custom_yolo-world.pt --yaml_pth=configs.yaml --zero_shot_segmentation=True
+python AutoCvat.py --img_folder="images" --weights=custom_yolo-world.pt --yaml_pth=config.yaml --zero_shot_segmentation=True
 ```
 
 ![Cvat YOLO-World example](documentation/yolo_world_example_seg.jpg)
