@@ -1,4 +1,4 @@
-ultralytics
+ultralytics>8.3.0
 click
 opencv-python
 PyYAML
